@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Question, Choice, Answer
+from .models import Category, Question, Choice, Answer , Message
 
 class ChoiceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,3 +22,12 @@ class AnswerSerializer(serializers.ModelSerializer):
         model = Answer
         fields = ['id', 'user', 'question', 'choice', 'created_at']
         read_only_fields = ['user', 'created_at']
+
+class MessageSerializer(serializers.ModelSerializer):
+    sender_nickname = serializers.CharField(source='sender.nickname', read_only=True)
+
+    class Meta:
+        model = Message
+        fields = ['id', 'match', 'sender', 'sender_nickname',
+                  'content', 'is_read', 'created_at']
+        read_only_fields = ['sender', 'is_read', 'created_at']
