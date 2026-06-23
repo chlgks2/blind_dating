@@ -47,6 +47,20 @@ INSTALLED_APPS = [
     'matching',
 ]
 
+# WSGI → ASGI 로 전환
+ASGI_APPLICATION = 'config.asgi.application'
+
+# Channel Layer (Redis 사용)
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': ['redis://127.0.0.1:6379/0'],   # localhost → 127.0.0.1, URL 형태
+        },
+    },
+}
+
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',

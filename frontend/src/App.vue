@@ -61,51 +61,55 @@ const loadMyMatches = async () => {
   myMatches.value = res.data.matches;
 };
 
-// === 채팅 ===
+// === 채팅 (WebSocket 버전) ===
 const currentMatchId = ref(null);
 const messages = ref([]);
 const newMessage = ref("");
-const lastMsgId = ref(0);
-let pollInterval = null;
+let socket = null;
 
 const openChat = async (matchId) => {
   currentMatchId.value = matchId;
   messages.value = [];
-  lastMsgId.value = 0;
-  await fetchMessages();
-  // 2초마다 새 메시지 폴링
-  pollInterval = setInterval(fetchMessages, 2000);
-};
 
-const fetchMessages = async () => {
-  if (!currentMatchId.value) return;
-  const res = await api.get(
-    `/matching/matches/${currentMatchId.value}/messages/`,
-    { params: { after: lastMsgId.value } },
+  // 1) 기존 메시지 히스토리는 HTTP로 먼저 로드
+  const res = await api.get(`/matching/matches/${matchId}/messages/`);
+  messages.value = res.data.messages;
+
+  // 2) WebSocket 연결 (토큰을 쿼리스트링으로)
+  const token = localStorage.getItem("access");
+  socket = new WebSocket(
+    `ws://127.0.0.1:8000/ws/chat/${matchId}/?token=${token}`,
   );
-  const newMsgs = res.data.messages;
-  if (newMsgs.length > 0) {
-    messages.value.push(...newMsgs);
-    lastMsgId.value = newMsgs[newMsgs.length - 1].id;
-  }
+
+  socket.onopen = () => console.log("WebSocket 연결됨");
+
+  socket.onmessage = (event) => {
+    const msg = JSON.parse(event.data);
+    messages.value.push(msg); // 새 메시지 실시간 추가
+  };
+
+  socket.onclose = () => console.log("WebSocket 종료");
+  socket.onerror = (e) => console.error("WebSocket 에러", e);
 };
 
-const sendMessage = async () => {
-  if (!newMessage.value.trim()) return;
-  await api.post(`/matching/matches/${currentMatchId.value}/messages/`, {
-    content: newMessage.value,
-  });
+const sendMessage = () => {
+  if (!newMessage.value.trim() || !socket) return;
+  socket.send(JSON.stringify({ content: newMessage.value }));
   newMessage.value = "";
-  await fetchMessages(); // 보낸 즉시 갱신
+  // 주의: 내가 보낸 것도 서버가 브로드캐스트해서 onmessage로 돌아옴
+  //       → messages에 자동 추가되므로 여기서 push 안 함
 };
 
 const closeChat = () => {
   currentMatchId.value = null;
-  if (pollInterval) clearInterval(pollInterval);
+  if (socket) {
+    socket.close();
+    socket = null;
+  }
 };
 
 onUnmounted(() => {
-  if (pollInterval) clearInterval(pollInterval);
+  if (socket) socket.close();
 });
 </script>
 
