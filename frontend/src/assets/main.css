@@ -1,35 +1,91 @@
-@import './base.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+a { text-decoration: none; }
+
+
+@font-face {
+  font-family: 'S-CoreDream';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-3Light.woff') format('woff');
+  font-weight: 300; font-style: normal;
+}
+@font-face {
+  font-family: 'S-CoreDream';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-4Regular.woff') format('woff');
+  font-weight: 400; font-style: normal;
+}
+@font-face {
+  font-family: 'S-CoreDream';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-6Bold.woff') format('woff');
+  font-weight: 600; font-style: normal;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+/* ── 디자인 토큰 ── */
+:root {
+  /* 배경 */
+  --app-canvas-bg:  #F2A0BE;
+  --dark-surface:   rgba(255, 255, 255, 0.09);
+  --dark-surface-2: rgba(255, 255, 255, 0.15);
+
+  /* 보더 */
+  --dark-border:    rgba(255,255,255,0.10);
+  --dark-border-hi: rgba(255,255,255,0.32);
+
+  /* 오브 (핑크 팔레트) */
+  --orb-1: #F2B3C4;
+  --orb-2: #f95764;
+  --orb-3: #F2B3DC;
+  --orb-4: #ea626d;
+  --orb-5: #f3ffe7;
+  --orb-6: #F2DBAE;
+
+  /* 텍스트 */
+  --white:       #ffffff;
+  --text-main:   #ffffff;
+  --text-sub:    rgba(255,255,255,0.65);
+  --text-muted:  rgba(255,255,255,0.40);
+
+  /* 폰트 */
+  --font-display: 'Raleway', 'Century Gothic', 'S-CoreDream', sans-serif;
+  --font-body: 'Raleway', 'S-CoreDream', 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
+
+  
+  /* 보더 라디우스 */
+  --r-pill: 999px;
+  --r-lg:   24px;
+  --r-md:   16px;
+  --r-sm:   10px;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+
+
+/* ── 전역 기본값 ── */
+body {
+  background-color: #ffffff !important;
+  color: var(--text-main);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+
+/* ── 레이아웃 쉘 ── */
+.app-shell {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+}
+
+.mobile-frame {
+  width: 100%;
+  max-width: 500px;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
 }
