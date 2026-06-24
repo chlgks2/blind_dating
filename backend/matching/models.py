@@ -4,77 +4,48 @@ from django.conf import settings
 
 # Create your models here.
 
-class Category(models.Model):
-    name = models.CharField(max_length=50) 
-    order = models.IntegerField(default=0)
-
-    class Meta:
-        ordering = ['order']
-
-    def __str__(self):
-        return self.name
-    
-
 class Question(models.Model):
-    SINGLE = 'single'
-    MUTLI = 'multi'
-    TYPE_CHOICES = [(SINGLE, '단일선택'),(MUTLI, '복수선택')]
+    """A vs B 양자택일 질문 (스와이프 좌/우)"""
 
     SIMILAR = 'similar'
     COMPLEMENT = 'complement'
     NEUTRAL = 'neutral'
     MATCH_TYPE_CHOICES = [
         (SIMILAR, '같을수록 좋음'),
-        (COMPLEMENT, '다를수록 좋음'), # ex) 계획 짜주는 사람 계획 따라가는거 좋아하는사람 
-        (NEUTRAL, '재미용'), # 민초파 vs 민초극혐파 이런식으로 재미용임 -> 가중치 작게
+        (COMPLEMENT, '다를수록 좋음'),
+        (NEUTRAL, '재미용'),
     ]
 
-    category = models.ForeignKey(
-        Category, related_name='questions', on_delete=models.CASCADE
-    )
-    text = models.TextField()
-    q_type = models.CharField(max_length=10, choices=TYPE_CHOICES, default=SINGLE)
+    option_a = models.CharField(max_length=50)   # 왼쪽 (예: 넷플)
+    option_b = models.CharField(max_length=50)   # 오른쪽 (예: 유튜브)
     match_type = models.CharField(max_length=12, choices=MATCH_TYPE_CHOICES, default=SIMILAR)
-    weight = models.FloatField(default=1.0)       # 가중치 웨이트임
+    weight = models.FloatField(default=1.0)
     order = models.IntegerField(default=0)
-
-    parent_choice = models.ForeignKey(
-        'choice',
-        null=True,
-        blank=True,
-        related_name='follow_up_questions',
-        on_delete=models.CASCADE
-    )
-
 
     class Meta:
         ordering = ['order']
 
     def __str__(self):
-        return self.text[:30]
-    
-class Choice(models.Model):
-    question = models.ForeignKey(
-        Question, related_name='choices', on_delete=models.CASCADE
-    )
-    text = models.TextField()
-    value = models.IntegerField()  # 1, 2, 3 (분석용 코드)
-    order = models.IntegerField(default=0)
-
-    def __str__(self):
-        return f'{self.question.text} - {self.text}'
+        return f'{self.option_a} vs {self.option_b}'
 
 class Answer(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='answer',on_delete=models.CASCADE)
+    """유저의 선택 (A 또는 B)"""
+    CHOICE_A = 'A'
+    CHOICE_B = 'B'
+    CHOICE_CHOICES = [(CHOICE_A, 'A'), (CHOICE_B, 'B')]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name='answers', on_delete=models.CASCADE
+    )
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_created=True)
+    selected = models.CharField(max_length=1, choices=CHOICE_CHOICES)  # 'A' or 'B'
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'question', 'choice')
+        unique_together = ('user', 'question')  # 질문당 1개 답변
 
     def __str__(self):
-        return f"{self.user} - {self.question.id} - {self.choice.value}"
+        return f'{self.user.nickname} - Q{self.question.id}: {self.selected}'
     
 class FriendRequest(models.Model):
     """친구요청 (한 방향)"""
@@ -147,3 +118,12 @@ class Message(models.Model):
 
     def __str__(self):
         return f'{self.sender.nickname}: {self.content[:20]}'
+    
+class Payment(models.Model):
+    """결제 기록"""
+    match = models.ForeignKey(Match, related_name='payments', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    imp_uid = models.CharField(max_length=100, unique=True)   # 포트원 결제 고유번호
+    amount = models.IntegerField()
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)

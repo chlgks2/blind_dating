@@ -60,7 +60,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             match = Match.objects.get(id=self.match_id)
         except Match.DoesNotExist:
             return False
-        return self.user == match.user_a or self.user == match.user_b
+        # 당사자 + 채팅 오픈(둘 다 결제) 상태여야 함
+        is_member = self.user == match.user_a or self.user == match.user_b
+        return is_member and match.is_chat_open   # ← 결제 조건 추가
 
     @database_sync_to_async
     def save_message(self, content):

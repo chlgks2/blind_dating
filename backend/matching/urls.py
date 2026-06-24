@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     QuestionListAPIView, AnswerSubmitAPIView, MatchListAPIView,
     SendFriendRequestAPIView, RespondFriendRequestAPIView, ReceivedRequestsAPIView,
-    MyMatchListAPIView, ChatMessageAPIView,
+    MyMatchListAPIView, ChatMessageAPIView, PaymentVerifyAPIView
 )
 
 urlpatterns = [
@@ -19,4 +19,7 @@ urlpatterns = [
     # 채팅
     path('my-matches/', MyMatchListAPIView.as_view()),                       # 내 채팅방 목록
     path('matches/<int:match_id>/messages/', ChatMessageAPIView.as_view()),  # 채팅
+
+    # 결제
+    path('payment/verify/', PaymentVerifyAPIView.as_view()),
 ]

@@ -7,6 +7,35 @@ const password = ref("");
 const message = ref("");
 const isLoggedIn = ref(false);
 
+// === 설문 ===
+const questions = ref([]);
+const currentIdx = ref(0);
+const myAnswers = ref([]);
+
+const loadSurvey = async () => {
+  const res = await api.get("/matching/questions/");
+  questions.value = res.data;
+  currentIdx.value = 0;
+  myAnswers.value = [];
+};
+
+// A=왼쪽 스와이프, B=오른쪽 스와이프
+const choose = (selected) => {
+  const q = questions.value[currentIdx.value];
+  myAnswers.value.push({ question: q.id, selected });
+  currentIdx.value++;
+
+  // 다 풀면 제출
+  if (currentIdx.value >= questions.value.length) {
+    submitSurvey();
+  }
+};
+
+const submitSurvey = async () => {
+  await api.post("/matching/answers/", { answers: myAnswers.value });
+  alert("설문 완료! 이제 매칭을 볼 수 있어요 🎉");
+};
+
 // === 로그인 ===
 const login = async () => {
   try {
@@ -111,6 +140,46 @@ const closeChat = () => {
 onUnmounted(() => {
   if (socket) socket.close();
 });
+
+// === 결제 ===
+const payForMatch = async (matchId) => {
+  const IMP = window.IMP;
+  IMP.init("imp07810156"); // 가맹점 식별코드
+
+  IMP.request_pay(
+    {
+      pg: "kakaopay.TC0ONETIME", // 카카오페이 테스트
+      pay_method: "card",
+      merchant_uid: `order_${matchId}_${Date.now()}`,
+      name: "소개팅 채팅 오픈",
+      amount: 100, // 테스트용 100원
+    },
+    async (rsp) => {
+      console.log("포트원 결제 응답:", rsp); // ① 포트원 응답 확인
+      if (rsp.success) {
+        try {
+          const res = await api.post("/matching/payment/verify/", {
+            match_id: matchId,
+            imp_uid: rsp.imp_uid,
+          });
+          console.log("백엔드 검증 응답:", res.data);
+          if (res.data.is_chat_open) {
+            alert("양쪽 결제 완료! 채팅이 열렸습니다 🎉");
+          } else {
+            alert("결제 완료! 상대방 결제를 기다리는 중입니다.");
+          }
+          loadMyMatches();
+        } catch (e) {
+          // ② 백엔드 400 에러 내용을 그대로 출력!
+          console.error("검증 실패:", e.response?.data);
+          alert("검증 실패: " + JSON.stringify(e.response?.data));
+        }
+      } else {
+        alert("결제 실패: " + rsp.error_msg);
+      }
+    },
+  );
+};
 </script>
 
 <template>
@@ -125,7 +194,38 @@ onUnmounted(() => {
       <button @click="login">로그인</button>
       <p>{{ message }}</p>
     </section>
+    <div style="padding: 30px; max-width: 400px">
+      <h3>취향 스와이프</h3>
+      <button @click="loadSurvey">설문 시작</button>
 
+      <div
+        v-if="questions.length && currentIdx < questions.length"
+        style="margin-top: 20px; text-align: center"
+      >
+        <p>{{ currentIdx + 1 }} / {{ questions.length }}</p>
+        <div
+          style="
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+          "
+        >
+          <button
+            @click="choose('A')"
+            style="flex: 1; height: 120px; font-size: 20px; background: #fdd"
+          >
+            ⬅️<br />{{ questions[currentIdx].option_a }}
+          </button>
+          <button
+            @click="choose('B')"
+            style="flex: 1; height: 120px; font-size: 20px; background: #ddf"
+          >
+            {{ questions[currentIdx].option_b }}<br />➡️
+          </button>
+        </div>
+      </div>
+    </div>
     <template v-if="isLoggedIn">
       <!-- 추천 + 친구요청 -->
       <section
@@ -165,8 +265,15 @@ onUnmounted(() => {
         <ul>
           <li v-for="m in myMatches" :key="m.match_id">
             {{ m.other_nickname }}
-            <small>({{ m.last_message || "대화 없음" }})</small>
-            <button @click="openChat(m.match_id)">채팅 열기</button>
+            <template v-if="m.is_chat_open">
+              <button @click="openChat(m.match_id)">채팅 열기</button>
+            </template>
+            <template v-else>
+              <button @click="payForMatch(m.match_id)">
+                💳 결제하고 채팅 열기
+              </button>
+              <small>(서로 결제해야 열려요)</small>
+            </template>
           </li>
         </ul>
       </section>
