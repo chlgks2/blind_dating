@@ -24,59 +24,79 @@
 
 ---
 
-# ✨ 주요 기능
+✨ 주요 기능
 
-### 회원가입 및 로그인
+### 회원 시스템
 
-- JWT 기반 인증
 - 회원가입
 - 로그인
+- JWT 인증
 - 내 정보 조회
 
-### 설문 시스템
+### 취향 설문 시스템
 
-- 카테고리별 질문 제공
-- 단일 선택 질문
-
-### 답변 저장
-
-- 사용자 답변 저장
-- 재설문 지원
-- 설문 완료 여부 관리
+- A vs B 양자택일 질문
+- 스와이프 기반 설문 UX
+- 답변 저장
+- 설문 재참여 지원
 
 ### 매칭 시스템
 
-- 유사도 계산
-- 가중치 기반 매칭
-- 복수 선택 질문 지원
-- 자카드 유사도(Jaccard Similarity) 적용
-- 비슷한 사람 / 다른 사람 선호 반영
+- Similar (같을수록 좋은 질문)
+- Complement (다를수록 좋은 질문)
+- Neutral (재미용 질문)
+- 질문별 가중치 적용
+- 유사도 기반 추천
 
-### 추천 기능
+### 친구 요청 시스템
 
-- 설문 완료한 이성 사용자 탐색
-- 유사도 높은 순 정렬
-- 상위 20명 추천
+- 친구 요청 전송
+- 친구 요청 수락 / 거절
+- 상호 연결 생성
+
+### 실시간 채팅
+
+- Django Channels 기반 WebSocket 채팅
+- Redis Channel Layer 사용
+- 채팅 내역 저장
+- 실시간 메시지 전송
+
+### 결제 시스템
+
+- PortOne 연동
+- 소개팅 채팅 오픈 결제
+- 양측 결제 완료 시 채팅방 활성화
 
 ---
 
-# 🛠 Tech Stack
+🛠 Tech Stack
 
-## Backend
+### Backend
 
 - Python
 - Django
 - Django REST Framework
+- Django Channels
 - Simple JWT
+- Redis
 - SQLite3
 
-## Frontend
+### Frontend
 
 - Vue 3
 - Pinia
 - Vue Router
 - Axios
 - Vite
+
+### Realtime
+
+- WebSocket
+- Redis Channel Layer
+
+### Payment
+
+- PortOne
 
 ---
 
