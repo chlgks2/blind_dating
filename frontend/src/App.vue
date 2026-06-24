@@ -143,9 +143,10 @@ onUnmounted(() => {
 
 // === 결제 ===
 const payForMatch = async (matchId) => {
+  console.log("결제 버튼 클릭됨", matchId);
   const IMP = window.IMP;
   IMP.init("imp07810156"); // 가맹점 식별코드
-
+  console.log(window.IMP);
   IMP.request_pay(
     {
       pg: "kakaopay.TC0ONETIME", // 카카오페이 테스트

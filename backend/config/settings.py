@@ -31,6 +31,15 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = []
 
+# AWS S3
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_S3_BUCKET = os.environ.get('AWS_S3_BUCKET')
+AWS_S3_REGION = os.environ.get('AWS_S3_REGION', 'ap-northeast-2')
+
+# ngrok
+ALLOWED_HOSTS = ["*"]
+
 # Application definition
 
 INSTALLED_APPS = [
