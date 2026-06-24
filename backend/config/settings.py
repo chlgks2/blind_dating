@@ -13,19 +13,21 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from datetime import timedelta
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-85d6ti5=nmo$qo+=khch!xb8xbe8q52iyb46-z_pl+-*(k0*c7'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = []
 
@@ -169,6 +171,6 @@ USE_TZ = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-PORTONE_API_KEY = '8785866816004737'
-PORTONE_API_SECRET = 'wJbjgnFLSLVPZRMPOugD7lybOD4Dw3o6Q0cbzEsuuZPDvH0SbeTstCJpgi0CDFsknOYO3aoclZju157L'
-PORTONE_IMP_CODE = 'imp07810156'   # 가맹점 식별코드
+PORTONE_API_KEY = os.environ.get('PORTONE_API_KEY')
+PORTONE_API_SECRET = os.environ.get('PORTONE_API_SECRET')
+PORTONE_IMP_CODE = os.environ.get('PORTONE_IMP_CODE')
