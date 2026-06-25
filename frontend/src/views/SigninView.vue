@@ -50,7 +50,7 @@ const login = async () => {
                 class="glass-input"
                 v-model="username"
                 type="text"
-                placeholder="Username"
+                placeholder="ID"
                 autocomplete="username"
               />
             </div>

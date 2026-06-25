@@ -156,6 +156,16 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
 ]
+
+# WebSocket CORS (Django Channels)
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGIN_REGEXES = []
+
+# channels가 WebSocket 연결을 허용할 출처
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+]
 # 커스텀 유저 모델 사용 하는거
 AUTH_USER_MODEL = 'accounts.User'
 

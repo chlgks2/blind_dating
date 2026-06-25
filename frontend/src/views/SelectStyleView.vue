@@ -81,6 +81,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '../api'
 
 const router = useRouter()
 
@@ -92,11 +93,12 @@ const selectedStyleId = ref(null)
 // ✨ 화면 전활 시 슥- 사라지는 연출을 위한 상태 클래스 관리 변수
 const animationClass = ref('fade-in')
 
+// apiKey: 백엔드 STYLE_CHOICES와 매핑
 const styleOptions = ref([
-  { id: 1, name: 'Ghibli', imgUrl: new URL('../assets/style1.png', import.meta.url).href },
-  { id: 2, name: 'Pixar', imgUrl: new URL('../assets/style2.png', import.meta.url).href },
-  { id: 3, name: 'Cyberpunk', imgUrl: new URL('../assets/style3.png', import.meta.url).href },
-  { id: 4, name: 'Dreamy', imgUrl: new URL('../assets/style4.png', import.meta.url).href },
+  { id: 1, name: 'Ghibli',    apiKey: 'ghibli',  imgUrl: new URL('../assets/style1.png', import.meta.url).href },
+  { id: 2, name: 'Pixar',     apiKey: 'pixar',   imgUrl: new URL('../assets/style2.png', import.meta.url).href },
+  { id: 3, name: 'Cyberpunk', apiKey: 'anime2d', imgUrl: new URL('../assets/style3.png', import.meta.url).href },
+  { id: 4, name: 'Dreamy',    apiKey: 'zepeto',  imgUrl: new URL('../assets/style4.png', import.meta.url).href },
 ])
 
 const handleFileUpload = (event) => {
@@ -111,17 +113,30 @@ const selectStyle = (id) => {
 }
 
 // 🎬 [Next] 버튼 누르면 스르륵 사라졌다가 부드럽게 나타나게 만드는 제어 함수
-const triggerNextStep = (nextTarget) => {
-  // 1. 먼저 화면 알맹이를 흐릿하게 밀어버리는 아웃 애니메이션 클래스를 켭니다.
+const triggerNextStep = async (nextTarget) => {
   animationClass.value = 'fade-out'
 
-  // 2. 애니메이션이 끝나는 약 0.4초(400ms) 뒤에 다음 타겟으로 전환!
-  setTimeout(() => {
+  setTimeout(async () => {
     if (nextTarget === 'questions') {
-      router.push('/loading')
+      // AI 작업 등록: 이미지 + 스타일 → POST /ai/create/
+      if (rawFile.value && selectedStyleId.value !== null) {
+        try {
+          const selected = styleOptions.value.find(s => s.id === selectedStyleId.value)
+          const formData = new FormData()
+          formData.append('image', rawFile.value)
+          formData.append('style', selected.apiKey)
+
+          const res = await api.post('/accounts/ai/create/', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          })
+          localStorage.setItem('ai_job_id', res.data.job_id)
+        } catch (e) {
+          console.error('AI 작업 등록 실패:', e)
+        }
+      }
+      router.push('/loading?type=questions')
     } else {
       currentStep.value = nextTarget
-      // 3. 전환된 뒤에는 다시 부드럽게 스르륵 떠오르도록 페이드인 클래스로 초기화
       animationClass.value = 'fade-in'
     }
   }, 400)

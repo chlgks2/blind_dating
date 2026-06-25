@@ -44,11 +44,13 @@
                   <Heart :size="18" :stroke-width="1.5" :fill="likedIds.has(user.id) ? '#fff' : 'none'" color="#fff" />
                 </button>
                 <div class="action-btns">
-                  <button class="icon-btn" @click.stop="sendFriendRequest(user.id)">
+                  <button
+                    class="icon-btn"
+                    :class="{ 'icon-btn--sent': sentRequests.has(user.id) }"
+                    @click.stop="sendFriendRequest(user.id)"
+                    :title="sentRequests.has(user.id) ? '요청 전송됨' : '친구요청'"
+                  >
                     <UserPlus :size="11" />
-                  </button>
-                  <button class="icon-btn" @click.stop="startChat(user.name)">
-                    <MessageCircle :size="11" />
                   </button>
                 </div>
               </div>
@@ -70,8 +72,9 @@
 
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '@/api'
 
 const router = useRouter()
 
@@ -81,13 +84,25 @@ import boy3 from '@/assets/boy3.png'
 import boy4 from '@/assets/boy4.png'
 import boy5 from '@/assets/boy5.png'
 
-const matchingUsers = ref([
-  { id: 1, name: '나는야최한',    similarity: 94, bio: '사이버펑크와 테크를 사랑하는 디자이너', image: boy1 },
-  { id: 2, name: '최한입니다',      similarity: 88, bio: '밤샘 코딩과 에스프레소를 즐기는 개발자', image: boy2 },
-  { id: 3, name: '최한', similarity: 82, bio: '몽환적인 보라색 오로라를 그리는 사람',  image: boy3 },
-  { id: 4, name: '최영우',      similarity: 79, bio: '레트로 게임과 도트 아트를 수집합니다',  image: boy4 },
-  { id: 5, name: '나는최영우',      similarity: 75, bio: '달빛 아래서 새로운 브랜딩 기획하기',    image: boy5 },
-])
+// 이미지가 없는 경우 순환 사용할 기본 이미지 목록
+const defaultImages = [boy1, boy2, boy3, boy4, boy5]
+
+const matchingUsers = ref([])
+
+onMounted(async () => {
+  try {
+    const res = await api.get('/matching/matches/recommend/')
+    matchingUsers.value = res.data.matches.map((u, i) => ({
+      id: u.user_id,
+      name: u.nickname,
+      similarity: Math.round(u.similarity * 100),
+      bio: `${u.birth_year ? (new Date().getFullYear() - u.birth_year) + '세' : ''}`,
+      image: defaultImages[i % defaultImages.length],
+    }))
+  } catch (e) {
+    console.error('추천 목록 로드 실패:', e)
+  }
+})
 
 const selectedId = ref(null)
 
@@ -99,13 +114,16 @@ const closeDetail = () => {
   selectedId.value = null
 }
 
-const sendFriendRequest = (id) => {
-  console.log('친구 요청:', id)
-  // 나중에 API 연결
-}
+const sentRequests = ref(new Set())
 
-const startChat = (name) => {
-  router.push({ path: '/payment', query: { userName: name } })
+const sendFriendRequest = async (id) => {
+  if (sentRequests.value.has(id)) return
+  try {
+    await api.post('/matching/friend-request/send/', { to_user: id })
+    sentRequests.value = new Set([...sentRequests.value, id])
+  } catch (e) {
+    console.error('친구요청 실패:', e)
+  }
 }
 
 const likedIds = ref(new Set())
@@ -119,7 +137,7 @@ const toggleLike = (id) => {
   likedIds.value = new Set(likedIds.value) // 반응성 트리거
 }
 
-import { Heart, UserPlus, MessageCircle, Home } from 'lucide-vue-next'
+import { Heart, UserPlus, Home } from 'lucide-vue-next'
 
 </script>
 
@@ -427,6 +445,11 @@ import { Heart, UserPlus, MessageCircle, Home } from 'lucide-vue-next'
 .action-btns {
   display: flex;
   gap: 6px;
+}
+
+.icon-btn--sent {
+  background: rgba(255, 180, 210, 0.5) !important;
+  cursor: default;
 }
 
 .icon-btn {

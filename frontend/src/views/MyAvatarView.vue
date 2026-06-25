@@ -11,7 +11,7 @@
 
         <div class="avatar-card-container">
           <div class="avatar-card">
-            <img src="@/assets/result.png" alt="Final AI Avatar" class="avatar-img" />
+            <img :src="avatarUrl" alt="Final AI Avatar" class="avatar-img" />
           </div>
         </div>
 
@@ -28,9 +28,14 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import defaultAvatar from '@/assets/result.png'
 
 const router = useRouter()
+
+// localStorage에 저장된 AI 생성 이미지 URL 사용, 없으면 기본 이미지
+const avatarUrl = ref(localStorage.getItem('ai_generated_url') || defaultAvatar)
 
 const goToMatching = () => {
   router.push('/matching')

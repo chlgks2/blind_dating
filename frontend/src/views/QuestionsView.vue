@@ -66,19 +66,28 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api'
 
 const router = useRouter()
 
-const mockQuestions = ref([
-  { id: 1, text: '붕어빵 먹을 때 당신의 선택은?', choice_A: '머리부터', choice_B: '꼬리부터' },
-  { id: 2, text: '면 요리와 밥 요리 중 더 좋아하는 것은?', choice_A: '든든한 밥', choice_B: '호로록 면' },
-  { id: 3, text: '주말을 보내는 이상적인 방법은?', choice_A: '집에서 넷플릭스', choice_B: '밖에서 친구들과' },
-  { id: 4, text: '과제를 할 때 당신의 스타일은?', choice_A: '미리미리 계획대로', choice_B: '벼락치기 스릴러' },
-  { id: 5, text: '더 참을 수 없는 상태는?', choice_A: '배고픈 건 못참아', choice_B: '졸린 건 못참아' },
-])
+// 백엔드 질문으로 교체 (option_a/option_b → choice_A/choice_B 매핑)
+const mockQuestions = ref([])
+
+onMounted(async () => {
+  try {
+    const res = await api.get('/matching/questions/')
+    mockQuestions.value = res.data.map(q => ({
+      id: q.id,
+      text: `${q.option_a} vs ${q.option_b}`,
+      choice_A: q.option_a,
+      choice_B: q.option_b,
+    }))
+  } catch (e) {
+    console.error('질문 로드 실패:', e)
+  }
+})
 
 const currentIndex = ref(0)
 const userAnswers = ref([])
@@ -148,10 +157,16 @@ const endDrag = () => {
 
 const submitResults = async () => {
   try {
-    console.log('최종 Django 전송 묶음:', userAnswers.value)
+    // 백엔드 형식으로 변환: { question: id, selected: 'A'|'B' }
+    const payload = userAnswers.value.map(a => ({
+      question: a.question_id,
+      selected: a.choice,
+    }))
+    await api.post('/matching/answers/', { answers: payload })
     router.push('/my-avatar')
   } catch (err) {
-    console.error(err)
+    console.error('답변 제출 실패:', err)
+    router.push('/my-avatar')
   }
 }
 </script>

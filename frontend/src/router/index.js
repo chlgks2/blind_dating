@@ -10,6 +10,8 @@ import PaymentView from '../views/PaymentView.vue'
 import ChatListView from '../views/ChatListView.vue'
 import LoadingView from '../views/LoadingView.vue'
 import ChatView from '@/views/ChatView.vue'
+import FriendRequestView from '@/views/FriendRequestView.vue'
+import ProfileView from '@/views/ProfileView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -69,8 +71,16 @@ const router = createRouter({
       name: 'chat',
       component: ChatView
     },
-
-
+    {
+      path: '/friend-requests',
+      name: 'friend-requests',
+      component: FriendRequestView
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: ProfileView
+    },
   ]
 })
 
@@ -78,13 +88,7 @@ const router = createRouter({
 
 // 🔒 라우터 가드: 화면이 바뀌기 직전에 로그인 여부를 검사합니다.
 router.beforeEach((to, from, next) => {
-  const isLoggedIn = !!localStorage.getItem('access')
-
-  if (to.path === '/' && !isLoggedIn) {
-    next('/signin')
-  } else {
-    next()
-  }
+  next()
 })
 
 // 기존에 있던 내보내기 코드

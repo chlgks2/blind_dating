@@ -7,28 +7,32 @@
           <h1 class="page-title">Messages</h1>
         </header>
 
-        <div class="chat-list-items">
-          <div class="chat-item-card" @click="router.push({ path: '/chat', query: { userName: '나는야최한' } })">
-            <div class="avatar-placeholder">최한</div>
+        <div class="chat-list-items" v-if="matches.length > 0">
+          <div
+            v-for="m in matches"
+            :key="m.match_id"
+            class="chat-item-card"
+            @click="m.is_chat_open
+              ? router.push({ path: '/chat', query: { matchId: m.match_id, userName: m.other_nickname } })
+              : router.push({ path: '/payment', query: { matchId: m.match_id, userName: m.other_nickname, userId: m.other_user_id } })"
+          >
+            <div class="avatar-placeholder">{{ m.other_nickname.slice(0, 2) }}</div>
             <div class="chat-info">
-              <h3>나는야최한</h3>
-              <p>온라인 • 최근 대화 없음</p>
-            </div>
-            <div class="arrow-icon">➔</div>
-          </div>
-
-          <div class="chat-item-card" @click="router.push({ path: '/chat', query: { userName: '최영우' } })">
-            <div class="avatar-placeholder">영우</div>
-            <div class="chat-info">
-              <h3>최영우</h3>
-              <p>오프라인</p>
+              <h3>{{ m.other_nickname }}</h3>
+              <p>{{ m.is_chat_open ? (m.last_message || '대화를 시작해보세요') : '결제 후 채팅 가능' }}</p>
             </div>
             <div class="arrow-icon">➔</div>
           </div>
         </div>
 
+        <div class="empty-state" v-else-if="!loading">
+          <p class="empty-text">아직 매칭된 상대가 없어요</p>
+          <p class="empty-sub">매칭 화면에서 친구요청을 보내보세요</p>
+          <button class="btn-go-match" @click="router.push('/matching')">매칭하러 가기</button>
+        </div>
+
         <nav class="bottom-nav">
-          <button class="nav-btn" @click="router.push('/')">
+          <button class="nav-btn" @click="router.push('/friend-requests')">
             <Heart :size="22" :stroke-width="1.5" />
           </button>
           <button class="nav-btn active" @click="router.push('/chatlist')">
@@ -45,10 +49,25 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Heart, MessageCircle, User } from 'lucide-vue-next'
+import api from '@/api'
 
 const router = useRouter()
+const matches = ref([])
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    const res = await api.get('/matching/my-matches/')
+    matches.value = res.data.matches
+  } catch (e) {
+    console.error('채팅방 목록 로드 실패:', e)
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <style scoped>
@@ -131,6 +150,47 @@ const router = useRouter()
 .arrow-icon {
   color: rgba(255, 255, 255, 0.3);
   font-size: 14px;
+}
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 120px;
+  gap: 8px;
+}
+
+.empty-text {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+.empty-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+  margin: 0 0 16px;
+}
+
+.btn-go-match {
+  padding: 11px 28px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-go-match:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .bottom-nav {

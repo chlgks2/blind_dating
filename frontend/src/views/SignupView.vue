@@ -1,30 +1,46 @@
-<script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import api from '../api'
+﻿<script setup>
+import { ref } from "vue"
+import { useRouter } from "vue-router"
+import api from "../api"
 
 const router = useRouter()
-const username = ref('')
-const nickname = ref('')
-const password = ref('')
-const message = ref('')
+const username = ref("")
+const password = ref("")
+const nickname = ref("")
+const gender = ref("")
+const birthYear = ref("")
+const matchPref = ref("neutral")
+const message = ref("")
 
 const handleSignup = async () => {
-  if (!username.value || !nickname.value || !password.value) {
-    message.value = '모든 칸을 입력해주세요.'
+  if (!username.value || !password.value || !nickname.value || !gender.value) {
+    message.value = "Username, Password, Nickname, 성별은 필수입니다."
     return
   }
 
+  const payload = {
+    username: username.value,
+    password: password.value,
+    nickname: nickname.value,
+    gender: gender.value,
+    match_preference: matchPref.value,
+  }
+
+  if (birthYear.value) {
+    const yr = Number(birthYear.value)
+    if (yr < 1940 || yr > new Date().getFullYear() - 18) {
+      message.value = "올바른 출생연도를 입력해주세요."
+      return
+    }
+    payload.birth_year = yr
+  }
+
   try {
-    await api.post('/accounts/signup/', {
-      username: username.value,
-      nickname: nickname.value,
-      password: password.value,
-    })
-    message.value = '회원가입 성공!'
-    setTimeout(() => router.push('/signin'), 800)
+    await api.post("/accounts/signup/", payload)
+    message.value = "회원가입 성공!"
+    setTimeout(() => router.push("/signin"), 800)
   } catch (e) {
-    message.value = '아이디나 닉네임이 이미 사용 중입니다.'
+    message.value = "아이디나 닉네임이 이미 사용 중입니다."
   }
 }
 </script>
@@ -45,45 +61,56 @@ const handleSignup = async () => {
           </div>
 
           <div class="form-group">
+
             <div class="glass-input-wrap">
-              <input
-                class="glass-input"
-                v-model="username"
-                type="text"
-                placeholder="Username"
-                autocomplete="username"
-              />
+              <input class="glass-input" v-model="username" type="text"
+                placeholder="ID" autocomplete="username" />
             </div>
+
             <div class="glass-input-wrap">
-              <input
-                class="glass-input"
-                v-model="nickname"
-                type="text"
-                placeholder="Nickname"
-                autocomplete="nickname"
-              />
+              <input class="glass-input" v-model="password" type="password"
+                placeholder="Password" autocomplete="new-password" />
             </div>
+
             <div class="glass-input-wrap">
-              <input
-                class="glass-input"
-                v-model="password"
-                type="password"
-                placeholder="Password"
-                autocomplete="new-password"
-                @keyup.enter="handleSignup"
-              />
+              <input class="glass-input" v-model="nickname" type="text"
+                placeholder="Nickname" autocomplete="nickname" />
             </div>
+
+            <div class="field-block">
+              <p class="field-label">성별 <span class="required">*</span></p>
+              <div class="toggle-group">
+                <button type="button" class="toggle-btn"
+                  :class="{ active: gender === 'M' }" @click="gender = 'M'">남성</button>
+                <button type="button" class="toggle-btn"
+                  :class="{ active: gender === 'F' }" @click="gender = 'F'">여성</button>
+              </div>
+            </div>
+
+            <div class="glass-input-wrap">
+              <input class="glass-input" v-model="birthYear" type="number"
+                placeholder="출생연도 (예: 1998) — 선택" min="1940"
+                :max="new Date().getFullYear() - 18" @keyup.enter="handleSignup" />
+            </div>
+
+            <div class="field-block">
+              <p class="field-label">매칭 스타일</p>
+              <div class="toggle-group three">
+                <button type="button" class="toggle-btn"
+                  :class="{ active: matchPref === 'similar' }" @click="matchPref = 'similar'">비슷한 사람</button>
+                <button type="button" class="toggle-btn"
+                  :class="{ active: matchPref === 'neutral' }" @click="matchPref = 'neutral'">반반</button>
+                <button type="button" class="toggle-btn"
+                  :class="{ active: matchPref === 'complement' }" @click="matchPref = 'complement'">다른 사람</button>
+              </div>
+            </div>
+
           </div>
 
-          <button class="btn-continue" @click="handleSignup">
-            Register
-          </button>
+          <button class="btn-continue" @click="handleSignup">Register</button>
 
-          <p
-            v-if="message"
-            class="status-msg"
-            :class="message.includes('성공') ? 'status-ok' : 'status-err'"
-          >
+          <p v-if="message" class="status-msg"
+            :class="message.includes('성공') ? 'status-ok' : 'status-err'">
             {{ message }}
           </p>
         </div>
@@ -96,12 +123,12 @@ const handleSignup = async () => {
 .login-body {
   position: relative;
   z-index: 1;
-  padding: 0 24px;
-  margin-top: 80px;
+  padding: 0 24px 40px;
+  margin-top: 64px;
 }
 
 .title-block {
-  margin-bottom: 40px;
+  margin-bottom: 32px;
   text-align: center;
 }
 
@@ -133,7 +160,7 @@ const handleSignup = async () => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
   width: 100%;
 }
 
@@ -142,9 +169,7 @@ const handleSignup = async () => {
   margin: 0 auto;
   box-sizing: border-box;
   border-radius: var(--r-pill);
-  transition: border-color 0.2s, box-shadow 0.2s;
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.25),
-              0 8px 32px rgba(252, 138, 197, 0.08);
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.25), 0 8px 32px rgba(252,138,197,0.08);
 }
 
 .glass-input {
@@ -163,7 +188,66 @@ const handleSignup = async () => {
 }
 
 .glass-input::placeholder {
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.45);
+  font-size: 13.5px;
+}
+
+.glass-input[type="number"]::-webkit-inner-spin-button,
+.glass-input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.field-block {
+  width: 80%;
+  margin: 4px auto 0;
+}
+
+.field-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 7px 4px;
+  font-family: var(--font-display);
+}
+
+.required {
+  color: rgba(255,180,210,0.7);
+}
+
+.toggle-group {
+  display: flex;
+  gap: 8px;
+}
+
+.toggle-group.three .toggle-btn {
+  font-size: 12px;
+  padding: 10px 0;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 11px 0;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--r-pill);
+  color: rgba(255,255,255,0.5);
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+
+.toggle-btn.active {
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.45);
+  color: #fff;
+}
+
+.toggle-btn:hover:not(.active) {
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.75);
 }
 
 .btn-continue {
@@ -182,8 +266,7 @@ const handleSignup = async () => {
   border: none;
   border-radius: var(--r-pill);
   cursor: pointer;
-  transition: transform 0.14s, box-shadow 0.14s, background 0.14s;
-  margin-bottom: 0px;
+  transition: transform 0.14s, box-shadow 0.14s;
 }
 
 .btn-continue:active {

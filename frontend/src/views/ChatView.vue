@@ -11,18 +11,18 @@
           <div class="header-right"></div>
         </header>
 
-        <div class="messages-area">
-          <div class="msg msg-other">
-            <div class="bubble bubble-other">안녕하세요 😊</div>
-            <span class="msg-time">10:09 PM</span>
-          </div>
-          <div class="msg msg-me">
-            <div class="bubble bubble-me">안녕하세요!</div>
-            <span class="msg-time">10:10 PM</span>
-          </div>
-          <div class="msg msg-other">
-            <div class="bubble bubble-other">반가워요 ✨</div>
-            <span class="msg-time">10:11 PM</span>
+        <div class="messages-area" ref="messagesArea">
+          <div
+            v-for="msg in messages"
+            :key="msg.id"
+            class="msg"
+            :class="msg.sender === myUserId || msg.sender_nickname !== userName ? 'msg-me' : 'msg-other'"
+          >
+            <div
+              class="bubble"
+              :class="msg.sender === myUserId || msg.sender_nickname !== userName ? 'bubble-me' : 'bubble-other'"
+            >{{ msg.content }}</div>
+            <span class="msg-time">{{ new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) }}</span>
           </div>
         </div>
 
@@ -44,20 +44,94 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ChevronLeft, Send } from 'lucide-vue-next'
+import api from '@/api'
 
 const router = useRouter()
 const route = useRoute()
 const userName = route.query.userName || '상대방'
+const matchId = route.query.matchId
 const inputText = ref('')
+const messages = ref([])
+
+// 내 닉네임 판별용 (JWT payload의 user_id 대신 메시지 sender로 구분)
+const myUserId = ref(null)
+
+// 메시지 영역 자동 스크롤
+const messagesArea = ref(null)
+const scrollToBottom = async () => {
+  await nextTick()
+  if (messagesArea.value) messagesArea.value.scrollTop = messagesArea.value.scrollHeight
+}
+
+// 기존 메시지 히스토리 로드
+const loadMessages = async () => {
+  if (!matchId) return
+  try {
+    const res = await api.get(`/matching/matches/${matchId}/messages/`)
+    messages.value = res.data.messages
+    scrollToBottom()
+  } catch (e) {
+    console.error('메시지 로드 실패:', e)
+  }
+}
+
+// 내 유저 ID 조회 (발신자 구분용)
+const loadMyProfile = async () => {
+  try {
+    const res = await api.get('/accounts/me/')
+    myUserId.value = res.data.id
+  } catch (e) {
+    console.error('프로필 조회 실패:', e)
+  }
+}
+
+// WebSocket 연결
+let ws = null
+
+const connectWebSocket = () => {
+  if (!matchId) return
+  const token = localStorage.getItem('access')
+  ws = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${matchId}/?token=${token}`)
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data)
+    // 서버에서 오는 형식: { id, sender_nickname, content, created_at }
+    messages.value.push({
+      id: data.id,
+      sender: null,                      // WebSocket엔 sender_id 없음
+      sender_nickname: data.sender_nickname,
+      content: data.content,
+      created_at: data.created_at,
+      is_read: false,
+    })
+    scrollToBottom()
+  }
+
+  ws.onerror = (e) => console.error('WebSocket 오류:', e)
+  ws.onclose = () => console.log('WebSocket 연결 종료')
+}
 
 const sendMessage = () => {
-  if (!inputText.value.trim()) return
-  console.log('전송:', inputText.value)
+  const content = inputText.value.trim()
+  if (!content) return
+
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ content }))
+  }
   inputText.value = ''
 }
+
+onMounted(async () => {
+  await Promise.all([loadMyProfile(), loadMessages()])
+  connectWebSocket()
+})
+
+onUnmounted(() => {
+  if (ws) ws.close()
+})
 </script>
 
 <style scoped>
