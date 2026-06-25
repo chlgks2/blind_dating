@@ -20,3 +20,5 @@ frontend/dist/
 
 # Mac
 .DS_Store
+
+test_s3.py

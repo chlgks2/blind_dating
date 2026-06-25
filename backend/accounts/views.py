@@ -149,7 +149,7 @@ class CompleteUploadJobAPIView(APIView):
         job.status = 'done'
         job.save()
 
-        job.user.profile_image_url = generated_url
-        job.user.save()
+        # job.user.profile_image_url = generated_url
+        # job.user.save()
 
         return Response({'message': '완료', 'generated_url': generated_url})

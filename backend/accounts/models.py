@@ -17,7 +17,7 @@ class User(AbstractUser):
     nickname = models.CharField(max_length=30, unique=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     birth_year = models.IntegerField(null=True, blank=True)
-    profile_image_url = models.URLField(max_length=500, null=True, blank=True)
+    # profile_image_url = models.URLField(max_length=500, null=True, blank=True)
 
     #질문 다풀었는지 물어보는거
     is_survey_done = models.BooleanField(default=False)

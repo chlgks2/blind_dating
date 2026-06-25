@@ -185,7 +185,7 @@ class MyMatchListAPIView(APIView):
                 'other_user_id': other.id,
                 'last_message': last_msg.content if last_msg else None,
                 'is_chat_open': m.is_chat_open,
-                'profile_image_url': other.profile_image_url,
+                # 'profile_image_url': other.profile_image_url,
             })
         return Response({'matches': data})
 
