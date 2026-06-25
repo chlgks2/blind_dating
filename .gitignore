@@ -21,4 +21,5 @@ frontend/dist/
 # Mac
 .DS_Store
 
-test_s3.py
+test_s3.py__pycache__/
+*.pyc
