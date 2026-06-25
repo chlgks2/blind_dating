@@ -1,80 +1,73 @@
 <template>
   <div class="app-shell">
     <div class="mobile-frame">
-
-      <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-           BACKGROUND : 딥 스페이스 오브
-      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-      <div class="bg-orbs" aria-hidden="true">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-        <div class="orb orb-4"></div>
-        <div class="sparkle s1"></div>
-        <div class="sparkle s2"></div>
-        <div class="sparkle s3"></div>
-        <div class="sparkle s4"></div>
-      </div>
-
-      <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-           BODY
-      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
       <div class="matching-body">
 
-        <!-- 상단 타이틀 (카드 선택 시 페이드아웃) -->
         <header class="title-block" :class="{ 'is-hidden': selectedId !== null }">
-          <p class="label-tag">BLIND DATING</p>
+          
           <h1 class="matching-title">Soul<br/>Match</h1>
-          <p class="matching-sub">당신과 유사도가 높은 5명의 페르소나입니다.</p>
+          <p class="matching-sub">잘 맞을 것 같은 다섯 명을 골라봤어요</p>
         </header>
 
-        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-             CARDS STAGE
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-        <div
-          class="cards-stage"
-          :class="{ 'has-selection': selectedId !== null }"
-          @click.self="closeDetail"
-        >
-          <!-- 선택 시 뒷배경 딤드 오버레이 -->
+        <div class="selected-name" :class="{ 'is-visible': selectedId !== null }">
+          {{ matchingUsers.find(u => u.id === selectedId)?.name }}님과
+          {{ matchingUsers.find(u => u.id === selectedId)?.similarity }}% 취향이 비슷해요
+        </div>
+
+        <div class="cards-stage" :class="{ 'has-selection': selectedId !== null }" @click.self="closeDetail">
           <div class="stage-overlay" @click="closeDetail"></div>
 
           <div
             v-for="(user, index) in matchingUsers"
             :key="user.id"
             class="scatter-card"
-            :class="[
-                `card-pos-${index + 1}`,
-                { 'is-active': selectedId === user.id },
-                { 'is-dimmed': selectedId !== null && selectedId !== user.id },
-            ]"
-           @click="selectedId === user.id ? null : toggleCard(user.id)"
->
-            <!-- 글라스 이미지 래퍼 -->
+            :class="[`card-pos-${index + 1}`, { 'is-active': selectedId === user.id }, { 'is-dimmed': selectedId !== null && selectedId !== user.id }]"
+            @click="selectedId === user.id ? null : toggleCard(user.id)"
+          >
             <div class="card-glass">
               <img :src="user.image" :alt="user.name" class="card-img" />
-              <!-- 이미지 위 글라스 레이어 -->
               <div class="card-glass-overlay"></div>
             </div>
 
-            <!-- 상세 정보 (active 시 슬라이드업) -->
+            <div class="sparkle-container">
+              <span class="sp sp-1">✦</span>
+              <span class="sp sp-2">✦</span>
+              <span class="sp sp-3">✦</span>
+              <span class="sp sp-4">✦</span>
+              <span class="sp sp-5">✦</span>
+              <span class="sp sp-6">✦</span>
+            </div>
+
             <div class="card-detail">
-              <span class="match-badge">{{ user.similarity }}% MATCH</span>
-              <h2 class="user-name">{{ user.name }}</h2>
-              <p class="user-bio">"{{ user.bio }}"</p>
-              <button class="btn-chat" @click.stop="startChat(user.name)">
-                대화하기
-              </button>
+              <div class="card-detail-row">
+                <button class="btn-heart" @click.stop="toggleLike(user.id)">
+                  <Heart :size="18" :stroke-width="1.5" :fill="likedIds.has(user.id) ? '#fff' : 'none'" color="#fff" />
+                </button>
+                <div class="action-btns">
+                  <button class="icon-btn" @click.stop="sendFriendRequest(user.id)">
+                    <UserPlus :size="11" />
+                  </button>
+                  <button class="icon-btn" @click.stop="startChat(user.name)">
+                    <MessageCircle :size="11" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
         </div>
 
-      </div>
+        <div class="bottom-nav" :class="{ 'is-hidden': selectedId !== null }">
+          <button class="btn-home" @click="router.push('/')">
+            <Home :size="18" :stroke-width="1.5" />
+          </button>
+        </div>
 
+      </div>
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref } from 'vue'
@@ -106,63 +99,31 @@ const closeDetail = () => {
   selectedId.value = null
 }
 
+const sendFriendRequest = (id) => {
+  console.log('친구 요청:', id)
+  // 나중에 API 연결
+}
+
 const startChat = (name) => {
   router.push({ path: '/payment', query: { userName: name } })
 }
+
+const likedIds = ref(new Set())
+
+const toggleLike = (id) => {
+  if (likedIds.value.has(id)) {
+    likedIds.value.delete(id)
+  } else {
+    likedIds.value.add(id)
+  }
+  likedIds.value = new Set(likedIds.value) // 반응성 트리거
+}
+
+import { Heart, UserPlus, MessageCircle, Home } from 'lucide-vue-next'
+
 </script>
 
 <style scoped>
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   BACKGROUND
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-.bg-orbs {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  animation: orb-drift ease-in-out infinite alternate;
-}
-
-.orb-1 {
-  width: 320px; height: 320px;
-  background: radial-gradient(circle, var(--orb-1) 0%, transparent 70%);
-  top: -100px; left: -80px;
-  animation-duration: 14s;
-}
-.orb-2 {
-  width: 260px; height: 260px;
-  background: radial-gradient(circle, var(--orb-2) 0%, transparent 70%);
-  top: 30%; right: -70px;
-  animation-duration: 18s;
-  animation-direction: alternate-reverse;
-}
-.orb-3 {
-  width: 220px; height: 220px;
-  background: radial-gradient(circle, var(--orb-3) 0%, transparent 70%);
-  bottom: 10%; left: -40px;
-  animation-duration: 11s;
-}
-.orb-4 {
-  width: 160px; height: 160px;
-  background: radial-gradient(circle, var(--orb-4) 0%, transparent 70%);
-  bottom: 20%; right: 10%;
-  animation-duration: 16s;
-  animation-direction: alternate-reverse;
-}
-
-@keyframes orb-drift {
-  from { transform: translate(0, 0) scale(1); }
-  to   { transform: translate(20px, 28px) scale(1.08); }
-}
-
-
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    BODY LAYOUT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -172,7 +133,7 @@ const startChat = (name) => {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  padding: 52px 24px 0;
+  padding: 60px 24px 50px;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -187,15 +148,6 @@ const startChat = (name) => {
   opacity: 0;
   transform: translateY(-16px);
   pointer-events: none;
-}
-
-.label-tag {
-  font-family: var(--font-display);
-  font-size: 10px;
-  letter-spacing: 0.3em;
-  color: var(--neon-purple);
-  margin-bottom: 8px;
-  text-shadow: 0 0 12px var(--neon-glow);
 }
 
 .matching-title {
@@ -218,6 +170,30 @@ const startChat = (name) => {
   line-height: 1.6;
 }
 
+.selected-name {
+  position: absolute;
+  top: 52px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  margin-top: 50px;
+
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 300;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.selected-name.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    CARDS STAGE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -227,6 +203,65 @@ const startChat = (name) => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  z-index: 50;
+
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.bottom-nav.is-hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(8px);  /* translateX 유지 */
+  pointer-events: none;
+}
+
+.btn-home {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.15s ease;
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.4),
+    0 0 28px rgba(255, 255, 255, 0.2),
+    0 0 50px rgba(255, 200, 220, 0.15);
+  animation: home-glow 5s ease-in-out infinite;
+}
+
+@keyframes home-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 12px rgba(255, 255, 255, 0.4),
+      0 0 28px rgba(255, 255, 255, 0.2),
+      0 0 50px rgba(255, 200, 220, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 18px rgba(255, 255, 255, 0.6),
+      0 0 40px rgba(255, 255, 255, 0.3),
+      0 0 70px rgba(255, 200, 220, 0.25);
+  }
+}
+
+.btn-home:hover {
+  background: rgba(255, 255, 255, 0.45);
+  transform: scale(1.1);
 }
 
 .stage-overlay {
@@ -241,6 +276,7 @@ const startChat = (name) => {
   opacity: 1;
   pointer-events: auto;
   cursor: pointer;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 60%, transparent 100%);
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -255,6 +291,20 @@ const startChat = (name) => {
   cursor: pointer;
   transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
   z-index: 10;
+
+  animation: floating ease-in-out infinite;
+}
+
+.card-pos-1 { transform: translate(-105px, -160px) rotate(-13deg); animation-duration: 3.2s; animation-delay: 0.0s; }
+.card-pos-2 { transform: translate(108px,  -115px) rotate(11deg);  animation-duration: 4.1s; animation-delay: 2.3s; }
+.card-pos-3 { transform: translate(-110px,  95px)  rotate(-9deg);  animation-duration: 3.7s; animation-delay: 1.0s; }
+.card-pos-4 { transform: translate(105px,  145px)  rotate(15deg);  animation-duration: 4.5s; animation-delay: 3.1s; }
+.card-pos-5 { transform: translate(0px,   -12px)   rotate(-2deg);  animation-duration: 3.9s; animation-delay: 1.7s; }
+
+@keyframes floating {
+  0%   { translate: 0 0; }
+  50%  { translate: 0 -10px; }
+  100% { translate: 0 0; }
 }
 
 /* 글라스 이미지 래퍼 */
@@ -264,11 +314,6 @@ const startChat = (name) => {
   height: 100%;
   border-radius: 18px;
   overflow: hidden;
-  border: 1px solid var(--dark-border);
-  box-shadow:
-    0 8px 32px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.08);
-  transition: border-color 0.4s, box-shadow 0.4s;
   flex-shrink: 0;
 }
 
@@ -288,36 +333,33 @@ const startChat = (name) => {
     135deg,
     rgba(255,255,255,0.12) 0%,
     rgba(255,255,255,0.02) 45%,
-    rgba(167,139,250,0.06) 100%
+    rgba(250, 139, 206, 0.06) 100%
   );
   border-top: 1px solid rgba(255,255,255,0.20);
   border-radius: 18px;
   pointer-events: none;
 }
 
-/* ── 산개 위치 ── */
-.card-pos-1 { transform: translate(-105px, -160px) rotate(-13deg); }
-.card-pos-2 { transform: translate(108px,  -115px) rotate(11deg);  }
-.card-pos-3 { transform: translate(-110px,  95px)  rotate(-9deg);  }
-.card-pos-4 { transform: translate(105px,  145px)  rotate(15deg);  }
-.card-pos-5 { transform: translate(0px,   -12px)   rotate(-2deg);  z-index: 11; }
-
 /* ── 액티브 : 중앙으로 오며 화면에 꽉 차게 ── */
 .scatter-card.is-active {
   transform: translate(0, 0) rotate(0deg) scale(2.15) !important;
   z-index: 100;
   cursor: default;
+
 }
+
 .scatter-card.is-active .card-glass {
   border-color: var(--dark-border-hi);
-  box-shadow:
-    0 0 0 1px rgba(167,139,250,0.25),
-    0 24px 60px rgba(0,0,0,0.75),
-    0 0 50px rgba(167,139,250,0.18);
+  animation: card-aura 3s linear infinite;
 }
-.scatter-card.is-active .card-glow-ring {
-  opacity: 1;
+
+@keyframes card-aura {
+  0%   { box-shadow: 0 0 40px rgba(255,236,242,0.6), 0 0 80px rgba(255,141,208,0.3); }
+  33%  { box-shadow: 0 0 60px rgba(255,255,255,0.8), 0 0 100px rgba(255,200,230,0.5); }
+  66%  { box-shadow: 0 0 30px rgba(255,141,208,0.6), 0 0 70px rgba(255,236,242,0.4); }
+  100% { box-shadow: 0 0 40px rgba(255,236,242,0.6), 0 0 80px rgba(255,141,208,0.3); }
 }
+
 .scatter-card.is-active .card-img {
   transform: scale(1.04);
 }
@@ -330,44 +372,40 @@ const startChat = (name) => {
   bottom: 0;
   left: 0;
   width: 100%;
-
-  padding: 40px 14px 14px;
-  text-align: left;
-  
-  background: linear-gradient(
-    to top,
-    rgba(6, 8, 26, 0.96) 0%,
-    rgba(6, 8, 26, 0.72) 55%,
-    transparent 100%
-  );
+  padding: 20px 14px 14px;
+ 
   border-radius: 0 0 18px 18px;
   box-sizing: border-box;
-
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 0.35s ease 0.28s, transform 0.35s ease 0.28s;
   pointer-events: none;
   z-index: 3;
+
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.3) 0%,
+    transparent 100%
+  );
 }
+
 .is-active .card-detail {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
 }
 
+.card-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .match-badge {
-  display: inline-block;
-  padding: 2px 7px;
   font-family: var(--font-display);
-  font-size: 7.5px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--neon-purple);
-  background: rgba(167,139,250,0.14);
-  border: 1px solid rgba(167,139,250,0.35);
-  border-radius: 999px;
-  margin-bottom: 5px;
-  text-shadow: 0 0 8px var(--neon-glow);
+  font-size: 30px;
+  font-weight: 100;
+  color: var(--font-body);
 }
 
 .user-name {
@@ -386,28 +424,104 @@ const startChat = (name) => {
   margin-bottom: 10px;
 }
 
-.btn-chat {
-  width: 100%;
-  padding: 7px 0;
-  background: rgba(167,139,250,0.12);
+.action-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.icon-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: none;
   color: #fff;
-  border: 1px solid rgba(167,139,250,0.38);
-  border-radius: 999px;
-  font-family: var(--font-body);
-  font-size: 8.5px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.15s ease;
 }
-.btn-chat:hover {
-  background: rgba(167,139,250,0.28);
-  border-color: rgba(167,139,250,0.65);
-  box-shadow: 0 0 16px rgba(167,139,250,0.28);
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.45);
+  transform: scale(1.1);
 }
+
+.icon-btn:active {
+  transform: scale(0.9);
+}
+
+.btn-heart {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: transform 0.15s ease;
+}
+.btn-heart:active {
+  animation: heart-pop 0.25s ease;
+}
+
+.heart-empty {
+  font-size: 22px;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255,255,255,0.6);
+}
+.heart-filled {
+  font-size: 22px;
+  color: #ff6b9d;
+  text-shadow: 0 0 10px rgba(255,107,157,0.8);
+  animation: heart-pop 0.25s ease;
+}
+
+@keyframes heart-pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   .orb, .sparkle { animation: none; }
+}
+
+.sparkle-container {
+  position: absolute;
+  inset: -20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 4;
+}
+
+.is-active .sparkle-container {
+  opacity: 1;
+}
+
+.sp {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 10px;
+  animation: sparkle-float 8s ease-in-out infinite;
+  text-shadow: 0 0 6px #fff, 0 0 12px #fff;
+}
+
+.sp-1 { top: 10%;  left: 5%;   animation-delay: 0.0s; font-size: 8px; animation-duration: 2.0s;  }
+.sp-2 { top: 25%;  right: 3%;  animation-delay: 0.6s; font-size: 12px; animation-duration: 2.8s; }
+.sp-3 { top: 60%;  left: 2%;   animation-delay: 1.1s; font-size: 7px; animation-duration: 1.8s; }
+.sp-4 { top: 5%;   right: 10%; animation-delay: 0.3s; font-size: 10px; animation-duration: 3.1s; }
+.sp-5 { bottom: 15%; left: 10%; animation-delay: 0.9s; font-size: 9px; animation-duration: 2.4s; }
+.sp-6 { bottom: 5%;  right: 8%; animation-delay: 1.5s; font-size: 11px; animation-duration: 1.6s; }
+
+@keyframes sparkle-float {
+  0%   { transform: translateY(0)    scale(0.8); opacity: 0; }
+  30%  { opacity: 1; }
+  70%  { opacity: 0.7; }
+  100% { transform: translateY(-18px) scale(1.2); opacity: 0; }
 }
 </style>

@@ -118,7 +118,7 @@ const triggerNextStep = (nextTarget) => {
   // 2. 애니메이션이 끝나는 약 0.4초(400ms) 뒤에 다음 타겟으로 전환!
   setTimeout(() => {
     if (nextTarget === 'questions') {
-      router.push('/questions')
+      router.push('/loading')
     } else {
       currentStep.value = nextTarget
       // 3. 전환된 뒤에는 다시 부드럽게 스르륵 떠오르도록 페이드인 클래스로 초기화

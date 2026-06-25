@@ -33,12 +33,6 @@ const handleSignup = async () => {
   <div class="app-shell">
     <div class="mobile-frame">
       <div class="login-screen">
-        <div class="bg-orbs">
-          <div class="orb orb-1"></div>
-          <div class="orb orb-2"></div>
-          <div class="orb orb-3"></div>
-        </div>
-
         <div class="login-body">
           <div class="title-block">
             <h1 class="signin-title">Sign up</h1>
@@ -99,63 +93,23 @@ const handleSignup = async () => {
 </template>
 
 <style scoped>
-
-.login-screen {
-  position: relative;
-  min-height: 100vh;
-}
-
-.bg-orbs {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(70px);
-}
-.orb-1 {
-  width: 280px; height: 280px;
-  background: radial-gradient(circle, rgba(255,180,210,0.65) 0%, transparent 70%);
-  top: -80px; left: -60px;
-  animation: drift 12s ease-in-out infinite alternate;
-}
-.orb-2 {
-  width: 220px; height: 220px;
-  background: radial-gradient(circle, rgba(240,130,170,0.50) 0%, transparent 70%);
-  top: 60px; right: -50px;
-  animation: drift 15s ease-in-out infinite alternate-reverse;
-}
-.orb-3 {
-  width: 180px; height: 180px;
-  background: radial-gradient(circle, rgba(255,210,230,0.55) 0%, transparent 70%);
-  top: 260px; left: 60px;
-  animation: drift 10s ease-in-out infinite alternate;
-}
-
-@keyframes drift {
-  from { transform: translate(0, 0) scale(1); }
-  to   { transform: translate(18px, 22px) scale(1.06); }
-}
-
 .login-body {
   position: relative;
   z-index: 1;
   padding: 0 24px;
-  margin-top: 52px;
+  margin-top: 80px;
 }
 
 .title-block {
-  margin-bottom: 32px;
+  margin-bottom: 40px;
+  text-align: center;
 }
 
 .signin-title {
-  font-size: 40px;
+  font-family: var(--font-display);
+  font-size: 34px;
   font-weight: 400;
-  color: #fff;
+  color: var(--white);
   letter-spacing: 0.02em;
   line-height: 1.1;
   text-transform: uppercase;
@@ -163,16 +117,15 @@ const handleSignup = async () => {
 
 .signin-sub {
   margin-top: 10px;
-  font-size: 14px;
-  color: rgba(255,255,255,0.72);
+  font-size: 13px;
+  color: var(--text-sub);
   line-height: 1.6;
   font-weight: 300;
 }
 
 .signup-link {
-  color: #fff;
-  font-weight: 600;
-  text-decoration: underline;
+  color: var(--white);
+  text-decoration: underline 0.3px;
   text-underline-offset: 2px;
 }
 
@@ -180,20 +133,18 @@ const handleSignup = async () => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
+  width: 100%;
 }
 
 .glass-input-wrap {
-  border-radius: 999px;
-  background: rgba(255,255,255,0.28);
-  border: 1px solid rgba(255,255,255,0.50);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  width: 80%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  border-radius: var(--r-pill);
   transition: border-color 0.2s, box-shadow 0.2s;
-}
-.glass-input-wrap:focus-within {
-  border-color: rgba(255,255,255,0.80);
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.18);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.25),
+              0 8px 32px rgba(252, 138, 197, 0.08);
 }
 
 .glass-input {
@@ -203,11 +154,14 @@ const handleSignup = async () => {
   border: none;
   outline: none;
   font-size: 14.5px;
-  font-weight: 400;
-  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 500;
+  color: var(--white);
   letter-spacing: 0.01em;
+  caret-color: var(--white);
   box-sizing: border-box;
 }
+
 .glass-input::placeholder {
   color: rgba(255,255,255,0.55);
 }
@@ -218,39 +172,33 @@ const handleSignup = async () => {
   margin: 0 auto;
   box-sizing: border-box;
   padding: 14px;
-  background: #fff;
-  color: #c85080;
+  background: var(--white);
+  color: var(--app-canvas-bg);
   font-size: 14.5px;
   font-weight: 600;
+  font-family: var(--font-display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   cursor: pointer;
-  transition: transform 0.14s, background 0.14s;
-  margin-bottom: 4px;
+  transition: transform 0.14s, box-shadow 0.14s, background 0.14s;
+  margin-bottom: 0px;
 }
-.btn-continue:active { transform: scale(0.97); }
-.btn-continue:hover { background: rgba(255,255,255,0.92); }
+
+.btn-continue:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(200,80,120,0.15);
+}
 
 .status-msg {
-  margin-top: 10px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 13px;
+  margin-top: 14px;
+  font-size: 10px;
   line-height: 1.5;
   font-weight: 500;
-  word-break: break-all;
-  backdrop-filter: blur(10px);
+  text-align: center;
 }
-.status-ok {
-  background: rgba(255,255,255,0.22);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.4);
-}
-.status-err {
-  background: rgba(200,50,80,0.18);
-  color: #fff;
-  border: 1px solid rgba(255,120,140,0.35);
-}
+
+.status-ok { color: #ffffff; }
+.status-err { color: #ffffff; font-size: 10px; font-weight: 200; }
 </style>

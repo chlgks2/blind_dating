@@ -22,7 +22,7 @@ const login = async () => {
     localStorage.setItem('access', res.data.access)
     localStorage.setItem('refresh', res.data.refresh)
     message.value = '로그인 성공!'
-    setTimeout(() => router.push('/select-style'), 800)
+    setTimeout(() => router.push('/loading?type=signin'), 800)
   } catch (e) {
     message.value = '아이디 또는 비밀번호가 올바르지 않습니다.'
   }
