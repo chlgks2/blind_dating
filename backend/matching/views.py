@@ -8,6 +8,7 @@ from django.conf import settings
 from .models import Question, Answer, Payment
 from .serializers import QuestionSerializer, AnswerSerializer
 
+from accounts.models import AIJob
 from django.contrib.auth import get_user_model
 from .similarity import calculate_similarity
 from .models import Question , FriendRequest, Match , Message
@@ -76,12 +77,25 @@ class MatchListAPIView(APIView):
         ).exclude(id=me.id).exclude(id__in=requested_ids)
 
         question_cache = {q.id: q for q in Question.objects.all()}
+        # 후보자들의 AI 이미지 URL을 한 번에 조회 (N+1 방지)
+        candidate_ids = [u.id for u in candidates]
+        ai_jobs = AIJob.objects.filter(
+            user_id__in=candidate_ids, status='done'
+        ).order_by('-created_at')
+        ai_url_map = {}
+        for job in ai_jobs:
+            if job.user_id not in ai_url_map:
+                ai_url_map[job.user_id] = job.generated_url
+
         results = []
         for other in candidates:
             score = calculate_similarity(me, other, question_cache)
             results.append({
-                'user_id': other.id, 'nickname': other.nickname,
-                'birth_year': other.birth_year, 'similarity': score,
+                'user_id': other.id,
+                'nickname': other.nickname,
+                'birth_year': other.birth_year,
+                'similarity': score,
+                'ai_image_url': ai_url_map.get(other.id),
             })
         results.sort(key=lambda x: x['similarity'], reverse=True)
         return Response({'matches': results[:20]})

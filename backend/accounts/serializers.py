@@ -28,7 +28,14 @@ class SignupSerializer(serializers.ModelSerializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     """내 정보 조회용"""
+    ai_image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = ['id', 'username', 'nickname', 'gender',
-                  'birth_year', 'match_preference', 'is_survey_done']
+                  'birth_year', 'match_preference', 'is_survey_done', 'ai_image_url']
+
+    def get_ai_image_url(self, obj):
+        from .models import AIJob
+        job = AIJob.objects.filter(user=obj, status='done').order_by('-created_at').first()
+        return job.generated_url if job else None

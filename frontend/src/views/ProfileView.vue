@@ -81,6 +81,11 @@ onMounted(async () => {
   try {
     const res = await api.get('/accounts/me/')
     user.value = res.data
+    // 백엔드에서 받은 AI 이미지를 우선 사용 (localStorage보다 신뢰도 높음)
+    if (res.data.ai_image_url) {
+      avatarUrl.value = res.data.ai_image_url
+      localStorage.setItem('ai_generated_url', res.data.ai_image_url)
+    }
   } catch (e) {
     console.error('프로필 로드 실패:', e)
   }

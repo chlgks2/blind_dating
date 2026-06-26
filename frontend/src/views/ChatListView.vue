@@ -32,6 +32,9 @@
         </div>
 
         <nav class="bottom-nav">
+          <button class="nav-btn" @click="router.push('/matching')">
+            <Sparkles :size="22" :stroke-width="1.5" />
+          </button>
           <button class="nav-btn" @click="router.push('/friend-requests')">
             <Heart :size="22" :stroke-width="1.5" />
           </button>
@@ -51,7 +54,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Heart, MessageCircle, User } from 'lucide-vue-next'
+import { Heart, MessageCircle, User, Sparkles } from 'lucide-vue-next'
 import api from '@/api'
 
 const router = useRouter()

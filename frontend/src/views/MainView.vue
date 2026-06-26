@@ -1,10 +1,8 @@
 <template>
   <div class="app-shell">
     <div class="mobile-frame">
-
       <!-- ── 로그인된 유저: 매칭 홈 ── -->
       <div v-if="isLoggedIn" class="main-screen" @click="handleLoggedInClick">
-
         <main class="main-content-area">
           <div class="orbit-system">
             <div class="sun"></div>
@@ -17,25 +15,41 @@
         </main>
 
         <nav class="bottom-nav">
-          <button class="nav-btn" :class="{ active: activeNav === 'likes' }"
-            @click.stop="activeNav = 'likes'; router.push('/friend-requests')">
+          <button
+            class="nav-btn"
+            :class="{ active: activeNav === 'likes' }"
+            @click.stop="
+              activeNav = 'likes';
+              router.push('/friend-requests');
+            "
+          >
             <Heart :size="22" :stroke-width="1.5" />
           </button>
-          <button class="nav-btn" :class="{ active: activeNav === 'chat' }"
-            @click.stop="activeNav = 'chat'; router.push('/chatlist')">
+          <button
+            class="nav-btn"
+            :class="{ active: activeNav === 'chat' }"
+            @click.stop="
+              activeNav = 'chat';
+              router.push('/chatlist');
+            "
+          >
             <MessageCircle :size="22" :stroke-width="1.5" />
           </button>
-          <button class="nav-btn" :class="{ active: activeNav === 'profile' }"
-            @click.stop="activeNav = 'profile'; router.push('/profile')">
+          <button
+            class="nav-btn"
+            :class="{ active: activeNav === 'profile' }"
+            @click.stop="
+              activeNav = 'profile';
+              router.push('/profile');
+            "
+          >
             <User :size="22" :stroke-width="1.5" />
           </button>
         </nav>
-
       </div>
 
       <!-- ── 비로그인 유저: 랜딩 페이지 ── -->
       <div v-else class="landing-screen" @click="router.push('/signin')">
-
         <div class="landing-orbit-bg">
           <div class="orbit orbit-1"><div class="planet p-1"></div></div>
           <div class="orbit orbit-2"><div class="planet p-2"></div></div>
@@ -46,8 +60,10 @@
 
         <div class="landing-content">
           <p class="landing-eyebrow">BLIND DATING</p>
-          <h1 class="landing-title">당신의<br/>인연을<br/>찾아요</h1>
-          <p class="landing-sub">AI가 만든 아바타로 시작하는<br/>블라인드 소개팅</p>
+          <h1 class="landing-title">당신의<br />인연을<br />찾아요</h1>
+          <p class="landing-sub">
+            AI가 만든 아바타로 시작하는<br />블라인드 소개팅
+          </p>
         </div>
 
         <div class="landing-bottom">
@@ -56,30 +72,50 @@
             화면을 터치해 시작하세요
           </div>
           <div class="auth-links" @click.stop>
-            <button class="btn-signin" @click="router.push('/signin')">로그인</button>
-            <button class="btn-signup" @click="router.push('/signup')">회원가입</button>
+            <button class="btn-signin" @click="router.push('/signin')">
+              로그인
+            </button>
+            <button class="btn-signup" @click="router.push('/signup')">
+              회원가입
+            </button>
           </div>
         </div>
-
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { Heart, MessageCircle, User } from 'lucide-vue-next'
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { Heart, MessageCircle, User } from "lucide-vue-next";
+import api from "@/api";
 
-const router = useRouter()
-const isLoggedIn = !!localStorage.getItem('access')
-const activeNav = ref('')
+const router = useRouter();
+const isLoggedIn = ref(false);
+const activeNav = ref("");
 
-// 로그인된 유저가 오빗 영역 클릭 → 매칭으로 이동
+onMounted(async () => {
+  const token = localStorage.getItem("access");
+  if (!token) return;
+
+  // 토큰이 있어도 서버에서 실제로 유효한지 검증
+  try {
+    await api.get("/accounts/me/");
+    isLoggedIn.value = true;
+  } catch {
+    // 토큰 만료 or DB 초기화 등으로 무효 → 초기화
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("ai_job_id");
+    localStorage.removeItem("ai_generated_url");
+    isLoggedIn.value = false;
+  }
+});
+
 const handleLoggedInClick = () => {
-  router.push('/matching')
-}
+  router.push("/matching");
+};
 </script>
 
 <style scoped>
@@ -90,31 +126,147 @@ const handleLoggedInClick = () => {
   position: absolute;
   border-radius: 50%;
   border: none;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), white calc(100% - 2px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), white calc(100% - 2px));
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 2px),
+    white calc(100% - 2px)
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 2px),
+    white calc(100% - 2px)
+  );
 }
 
-.orbit-1 { width: 165px; height: 165px; background: conic-gradient(transparent 0deg, rgba(255,255,255,0.03) 15deg, rgba(255,255,255,0.5) 355deg, transparent 360deg); animation: trail-spin 6s linear infinite; }
-.orbit-2 { width: 210px; height: 210px; background: conic-gradient(transparent 0deg, rgba(255,255,255,0.02) 15deg, rgba(255,255,255,0.4) 355deg, transparent 360deg); animation: trail-spin 20s linear infinite; }
-.orbit-3 { width: 290px; height: 290px; background: conic-gradient(transparent 0deg, rgba(255,255,255,0.03) 15deg, rgba(255,255,255,0.45) 355deg, transparent 360deg); animation: trail-spin 9s linear infinite; }
-.orbit-4 { width: 350px; height: 350px; background: conic-gradient(transparent 0deg, rgba(255,255,255,0.02) 80deg, rgba(255,255,255,0.35) 355deg, transparent 360deg); animation: trail-spin 14s linear infinite; }
-.orbit-5 { width: 440px; height: 440px; background: conic-gradient(transparent 0deg, rgba(255,255,255,0.02) 90deg, rgba(255,255,255,0.4) 355deg, transparent 360deg); animation: trail-spin 24s linear infinite; }
+.orbit-1 {
+  width: 165px;
+  height: 165px;
+  background: conic-gradient(
+    transparent 0deg,
+    rgba(255, 255, 255, 0.03) 15deg,
+    rgba(255, 255, 255, 0.5) 355deg,
+    transparent 360deg
+  );
+  animation: trail-spin 6s linear infinite;
+}
+.orbit-2 {
+  width: 210px;
+  height: 210px;
+  background: conic-gradient(
+    transparent 0deg,
+    rgba(255, 255, 255, 0.02) 15deg,
+    rgba(255, 255, 255, 0.4) 355deg,
+    transparent 360deg
+  );
+  animation: trail-spin 20s linear infinite;
+}
+.orbit-3 {
+  width: 290px;
+  height: 290px;
+  background: conic-gradient(
+    transparent 0deg,
+    rgba(255, 255, 255, 0.03) 15deg,
+    rgba(255, 255, 255, 0.45) 355deg,
+    transparent 360deg
+  );
+  animation: trail-spin 9s linear infinite;
+}
+.orbit-4 {
+  width: 350px;
+  height: 350px;
+  background: conic-gradient(
+    transparent 0deg,
+    rgba(255, 255, 255, 0.02) 80deg,
+    rgba(255, 255, 255, 0.35) 355deg,
+    transparent 360deg
+  );
+  animation: trail-spin 14s linear infinite;
+}
+.orbit-5 {
+  width: 440px;
+  height: 440px;
+  background: conic-gradient(
+    transparent 0deg,
+    rgba(255, 255, 255, 0.02) 90deg,
+    rgba(255, 255, 255, 0.4) 355deg,
+    transparent 360deg
+  );
+  animation: trail-spin 24s linear infinite;
+}
 
 @keyframes trail-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.planet { position: absolute; border-radius: 50%; top: 50%; left: 50%; }
-.p-1 { width: 11px; height: 11px; margin-top: -5.5px; margin-left: -5.5px; background: radial-gradient(circle, #fff 0%, rgba(255,180,200,0.9) 100%); box-shadow: 0 0 8px rgba(255,255,255,0.9); animation: planet-spin 6s linear infinite; transform-origin: -55px 0; }
-.p-2 { width: 10px; height: 10px; margin-top: -5px; margin-left: -5px; background: radial-gradient(circle, #fff 0%, rgba(255,200,220,0.9) 100%); box-shadow: 0 0 7px rgba(255,255,255,0.8); animation: planet-spin 20s linear infinite; transform-origin: -85px 0; }
-.p-3 { width: 13px; height: 13px; margin-top: -6.5px; margin-left: -6.5px; background: radial-gradient(circle, #fff 0%, rgba(255,150,180,0.9) 100%); box-shadow: 0 0 10px rgba(255,255,255,0.8); animation: planet-spin 9s linear infinite; transform-origin: -115px 0; }
-.p-4 { width: 10px; height: 10px; margin-top: -5px; margin-left: -5px; background: radial-gradient(circle, #fff 0%, rgba(200,180,255,0.9) 100%); box-shadow: 0 0 7px rgba(255,255,255,0.7); animation: planet-spin 14s linear infinite; transform-origin: -147.5px 0; }
-.p-5 { width: 9px; height: 9px; margin-top: -4.5px; margin-left: -4.5px; background: radial-gradient(circle, #fff 0%, rgba(230,180,255,0.9) 100%); box-shadow: 0 0 7px rgba(255,255,255,0.6); animation: planet-spin 24s linear infinite; transform-origin: -180px 0; }
+.planet {
+  position: absolute;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+}
+.p-1 {
+  width: 11px;
+  height: 11px;
+  margin-top: -5.5px;
+  margin-left: -5.5px;
+  background: radial-gradient(circle, #fff 0%, rgba(255, 180, 200, 0.9) 100%);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+  animation: planet-spin 6s linear infinite;
+  transform-origin: -55px 0;
+}
+.p-2 {
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  margin-left: -5px;
+  background: radial-gradient(circle, #fff 0%, rgba(255, 200, 220, 0.9) 100%);
+  box-shadow: 0 0 7px rgba(255, 255, 255, 0.8);
+  animation: planet-spin 20s linear infinite;
+  transform-origin: -85px 0;
+}
+.p-3 {
+  width: 13px;
+  height: 13px;
+  margin-top: -6.5px;
+  margin-left: -6.5px;
+  background: radial-gradient(circle, #fff 0%, rgba(255, 150, 180, 0.9) 100%);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  animation: planet-spin 9s linear infinite;
+  transform-origin: -115px 0;
+}
+.p-4 {
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  margin-left: -5px;
+  background: radial-gradient(circle, #fff 0%, rgba(200, 180, 255, 0.9) 100%);
+  box-shadow: 0 0 7px rgba(255, 255, 255, 0.7);
+  animation: planet-spin 14s linear infinite;
+  transform-origin: -147.5px 0;
+}
+.p-5 {
+  width: 9px;
+  height: 9px;
+  margin-top: -4.5px;
+  margin-left: -4.5px;
+  background: radial-gradient(circle, #fff 0%, rgba(230, 180, 255, 0.9) 100%);
+  box-shadow: 0 0 7px rgba(255, 255, 255, 0.6);
+  animation: planet-spin 24s linear infinite;
+  transform-origin: -180px 0;
+}
 
 @keyframes planet-spin {
-  from { transform: rotate(0deg) translateX(0); }
-  to   { transform: rotate(360deg) translateX(0); }
+  from {
+    transform: rotate(0deg) translateX(0);
+  }
+  to {
+    transform: rotate(360deg) translateX(0);
+  }
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -153,15 +305,34 @@ const handleLoggedInClick = () => {
   width: 45px;
   height: 45px;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff 0%, rgba(255, 220, 230, 0.9) 50%, transparent 100%);
-  box-shadow: 0 0 20px rgba(255,255,255,0.9), 0 0 50px rgba(255,255,255,0.5), 0 0 90px rgba(255,255,255,0.2);
+  background: radial-gradient(
+    circle,
+    #fff 0%,
+    rgba(255, 220, 230, 0.9) 50%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 20px rgba(255, 255, 255, 0.9),
+    0 0 50px rgba(255, 255, 255, 0.5),
+    0 0 90px rgba(255, 255, 255, 0.2);
   z-index: 10;
   animation: sun-pulse 3s ease-in-out infinite;
 }
 
 @keyframes sun-pulse {
-  0%, 100% { transform: scale(1);   box-shadow: 0 0 20px rgba(255,255,255,0.9), 0 0 50px rgba(255,200,220,0.6); }
-  50%       { transform: scale(1.1); box-shadow: 0 0 30px rgba(255,255,255,1),   0 0 70px rgba(255,200,220,0.8); }
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 20px rgba(255, 255, 255, 0.9),
+      0 0 50px rgba(255, 200, 220, 0.6);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow:
+      0 0 30px rgba(255, 255, 255, 1),
+      0 0 70px rgba(255, 200, 220, 0.8);
+  }
 }
 
 .bottom-nav {
@@ -192,7 +363,9 @@ const handleLoggedInClick = () => {
   width: 52px;
   height: 40px;
   border-radius: 999px;
-  transition: background 0.25s ease, color 0.25s ease;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
 }
 
 .nav-btn.active {
@@ -201,7 +374,9 @@ const handleLoggedInClick = () => {
   width: 64px;
 }
 
-.nav-btn:hover { color: #fff; }
+.nav-btn:hover {
+  color: #fff;
+}
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    비로그인 랜딩 화면
@@ -242,8 +417,14 @@ const handleLoggedInClick = () => {
 }
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .landing-eyebrow {
@@ -305,8 +486,15 @@ const handleLoggedInClick = () => {
 }
 
 @keyframes dot-pulse {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50%       { opacity: 1;   transform: scale(1.3); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
 }
 
 .auth-links {
@@ -318,7 +506,7 @@ const handleLoggedInClick = () => {
   flex: 1;
   padding: 14px;
   background: #fff;
-  color: #1a0a12;
+  color: #f1a3be;
   border: none;
   border-radius: var(--r-pill);
   font-family: var(--font-display);
@@ -329,7 +517,9 @@ const handleLoggedInClick = () => {
   transition: transform 0.14s ease;
 }
 
-.btn-signin:active { transform: scale(0.97); }
+.btn-signin:active {
+  transform: scale(0.97);
+}
 
 .btn-signup {
   flex: 1;
@@ -343,9 +533,15 @@ const handleLoggedInClick = () => {
   font-weight: 400;
   letter-spacing: 0.06em;
   cursor: pointer;
-  transition: background 0.2s, transform 0.14s ease;
+  transition:
+    background 0.2s,
+    transform 0.14s ease;
 }
 
-.btn-signup:hover  { background: rgba(255, 255, 255, 0.18); }
-.btn-signup:active { transform: scale(0.97); }
+.btn-signup:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.btn-signup:active {
+  transform: scale(0.97);
+}
 </style>

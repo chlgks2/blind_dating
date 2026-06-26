@@ -95,9 +95,9 @@ onMounted(async () => {
     matchingUsers.value = res.data.matches.map((u, i) => ({
       id: u.user_id,
       name: u.nickname,
-      similarity: Math.round(u.similarity * 100),
+      similarity: Math.round(u.similarity),
       bio: `${u.birth_year ? (new Date().getFullYear() - u.birth_year) + '세' : ''}`,
-      image: defaultImages[i % defaultImages.length],
+      image: u.ai_image_url || defaultImages[i % defaultImages.length],
     }))
   } catch (e) {
     console.error('추천 목록 로드 실패:', e)

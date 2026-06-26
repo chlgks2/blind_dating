@@ -9,14 +9,30 @@
           <p class="signin-sub">당신의 취향을 담은 프로필이 생성되었습니다</p>
         </div>
 
-        <div class="avatar-card-container">
+        <!-- 생성 완료: 이미지 표시 -->
+        <div v-if="avatarUrl" class="avatar-card-container">
           <div class="avatar-card">
             <img :src="avatarUrl" alt="Final AI Avatar" class="avatar-img" />
           </div>
         </div>
 
+        <!-- 생성 중: 대기 UI -->
+        <div v-else-if="isGenerating" class="generating-wrap">
+          <div class="generating-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <p class="generating-text">이미지 생성 중이에요</p>
+          <p class="generating-sub">잠시만 기다려주세요</p>
+        </div>
+
+        <!-- 이미지도 없고 생성 중도 아님 (실패/미등록) -->
+        <div v-else class="generating-wrap">
+          <p class="generating-text">이미지를 불러올 수 없어요</p>
+          <p class="generating-sub">프로필 사진을 다시 업로드해주세요</p>
+        </div>
+
         <div class="action-block">
-          <button class="btn-continue" @click="goToMatching">
+          <button class="btn-continue" :disabled="!avatarUrl" @click="goToMatching">
             매칭하러 가기
           </button>
         </div>
@@ -28,18 +44,56 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import defaultAvatar from '@/assets/result.png'
+import api from '@/api'
 
 const router = useRouter()
+const avatarUrl = ref(null)   // null = 아직 모름
+const isGenerating = ref(false)
+let pollTimer = null
 
-// localStorage에 저장된 AI 생성 이미지 URL 사용, 없으면 기본 이미지
-const avatarUrl = ref(localStorage.getItem('ai_generated_url') || defaultAvatar)
-
-const goToMatching = () => {
-  router.push('/matching')
+const stopPoll = () => {
+  if (pollTimer) { clearTimeout(pollTimer); pollTimer = null }
 }
+
+const pollStatus = async () => {
+  const jobId = localStorage.getItem('ai_job_id')
+  if (!jobId) { isGenerating.value = false; return }
+  try {
+    const res = await api.get(`/accounts/ai/status/${jobId}/`)
+    if (res.data.status === 'done' && res.data.generated_url) {
+      localStorage.setItem('ai_generated_url', res.data.generated_url)
+      avatarUrl.value = res.data.generated_url
+      isGenerating.value = false
+      stopPoll()
+    } else if (res.data.status === 'failed') {
+      isGenerating.value = false
+      stopPoll()
+    } else {
+      // pending / processing → 3초 후 재시도
+      pollTimer = setTimeout(pollStatus, 3000)
+    }
+  } catch (e) {
+    pollTimer = setTimeout(pollStatus, 3000)
+  }
+}
+
+onMounted(async () => {
+  // 이미 저장된 URL이 있으면 바로 표시
+  const cached = localStorage.getItem('ai_generated_url')
+  if (cached) {
+    avatarUrl.value = cached
+    return
+  }
+  // 없으면 생성 중 상태로 폴링 시작
+  isGenerating.value = true
+  await pollStatus()
+})
+
+onUnmounted(stopPoll)
+
+const goToMatching = () => router.push('/matching')
 </script>
 
 <style scoped>
@@ -82,6 +136,53 @@ const goToMatching = () => {
   color: var(--text-sub);
   line-height: 1.6;
   font-weight: 300;
+}
+
+.generating-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding-bottom: 60px;
+}
+
+.generating-dots {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.generating-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  animation: dot-blink 1.4s ease-in-out infinite;
+}
+
+.generating-dots span:nth-child(2) { animation-delay: 0.2s; }
+.generating-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dot-blink {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+  40%            { opacity: 1;   transform: scale(1.2); }
+}
+
+.generating-text {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 300;
+  color: #fff;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.generating-sub {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
 }
 
 .avatar-card-container {

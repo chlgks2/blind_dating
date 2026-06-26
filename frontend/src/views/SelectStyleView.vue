@@ -1,9 +1,7 @@
 <template>
   <div class="app-shell">
     <div class="mobile-frame">
-
       <div class="view-body" :class="animationClass">
-        
         <div v-if="currentStep === 1" class="step-wrapper">
           <div class="title-block">
             <h1 class="signin-title">Upload Photo</h1>
@@ -11,25 +9,34 @@
           </div>
 
           <div class="upload-container">
-            <label class="glass-upload-box" :class="{ 'has-preview': imagePreview }">
-              <input type="file" accept="image/*" class="file-hidden" @change="handleFileUpload" />
-              
+            <label
+              class="glass-upload-box"
+              :class="{ 'has-preview': imagePreview }"
+            >
+              <input
+                type="file"
+                accept="image/*"
+                class="file-hidden"
+                @change="handleFileUpload"
+              />
+
               <div v-if="!imagePreview" class="upload-placeholder">
                 <span class="upload-hint">얼굴이 잘 나온 사진이 좋아요</span>
               </div>
 
               <div v-else class="preview-wrapper">
-                <img :src="imagePreview" class="preview-img" alt="Uploaded preview" />
+                <img
+                  :src="imagePreview"
+                  class="preview-img"
+                  alt="Uploaded preview"
+                />
                 <div class="preview-overlay">사진 바꾸기</div>
               </div>
             </label>
           </div>
 
           <div class="action-block" :class="{ 'show-btn': imagePreview }">
-            <button 
-              class="btn-continue" 
-              @click="triggerNextStep(2)"
-            >
+            <button class="btn-continue" @click="triggerNextStep(2)">
               Next
             </button>
           </div>
@@ -42,8 +49,8 @@
           </div>
 
           <div class="grid-container">
-            <div 
-              v-for="style in styleOptions" 
+            <div
+              v-for="style in styleOptions"
               :key="style.id"
               class="style-card"
               :class="{ active: selectedStyleId === style.id }"
@@ -58,93 +65,110 @@
             </div>
           </div>
 
-          <div class="action-block" :class="{ 'show-btn': selectedStyleId !== null }">
-
-            <button 
-              class="btn-continue" 
+          <div
+            class="action-block"
+            :class="{ 'show-btn': selectedStyleId !== null }"
+          >
+            <button
+              class="btn-continue"
               :disabled="selectedStyleId === null"
               @click="triggerNextStep('questions')"
             >
               Next
             </button>
-
           </div>
         </div>
-
       </div>
-
     </div>
   </div>
 </template>
 
-
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import api from '../api'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import api from "../api";
 
-const router = useRouter()
+const router = useRouter();
 
-const currentStep = ref(1)
-const rawFile = ref(null)
-const imagePreview = ref(null)
-const selectedStyleId = ref(null)
+const currentStep = ref(1);
+const rawFile = ref(null);
+const imagePreview = ref(null);
+const selectedStyleId = ref(null);
 
 // ✨ 화면 전활 시 슥- 사라지는 연출을 위한 상태 클래스 관리 변수
-const animationClass = ref('fade-in')
+const animationClass = ref("fade-in");
 
 // apiKey: 백엔드 STYLE_CHOICES와 매핑
 const styleOptions = ref([
-  { id: 1, name: 'Ghibli',    apiKey: 'ghibli',  imgUrl: new URL('../assets/style1.png', import.meta.url).href },
-  { id: 2, name: 'Pixar',     apiKey: 'pixar',   imgUrl: new URL('../assets/style2.png', import.meta.url).href },
-  { id: 3, name: 'Cyberpunk', apiKey: 'anime2d', imgUrl: new URL('../assets/style3.png', import.meta.url).href },
-  { id: 4, name: 'Dreamy',    apiKey: 'zepeto',  imgUrl: new URL('../assets/style4.png', import.meta.url).href },
-])
+  {
+    id: 1,
+    name: "Ghibli",
+    apiKey: "ghibli",
+    imgUrl: new URL("../assets/style1.png", import.meta.url).href,
+  },
+  {
+    id: 2,
+    name: "2D Anime",
+    apiKey: "pixar",
+    imgUrl: new URL("../assets/style2.jpg", import.meta.url).href,
+  },
+  {
+    id: 3,
+    name: "Pixar",
+    apiKey: "anime2d",
+    imgUrl: new URL("../assets/style3.png", import.meta.url).href,
+  },
+  {
+    id: 4,
+    name: "WebToon",
+    apiKey: "zepeto",
+    imgUrl: new URL("../assets/style4.jpg", import.meta.url).href,
+  },
+]);
 
 const handleFileUpload = (event) => {
-  const file = event.target.files[0]
-  if (!file) return
-  rawFile.value = file
-  imagePreview.value = URL.createObjectURL(file)
-}
+  const file = event.target.files[0];
+  if (!file) return;
+  rawFile.value = file;
+  imagePreview.value = URL.createObjectURL(file);
+};
 
 const selectStyle = (id) => {
-  selectedStyleId.value = id
-}
+  selectedStyleId.value = id;
+};
 
 // 🎬 [Next] 버튼 누르면 스르륵 사라졌다가 부드럽게 나타나게 만드는 제어 함수
 const triggerNextStep = async (nextTarget) => {
-  animationClass.value = 'fade-out'
+  animationClass.value = "fade-out";
 
   setTimeout(async () => {
-    if (nextTarget === 'questions') {
+    if (nextTarget === "questions") {
       // AI 작업 등록: 이미지 + 스타일 → POST /ai/create/
       if (rawFile.value && selectedStyleId.value !== null) {
         try {
-          const selected = styleOptions.value.find(s => s.id === selectedStyleId.value)
-          const formData = new FormData()
-          formData.append('image', rawFile.value)
-          formData.append('style', selected.apiKey)
+          const selected = styleOptions.value.find(
+            (s) => s.id === selectedStyleId.value,
+          );
+          const formData = new FormData();
+          formData.append("image", rawFile.value);
+          formData.append("style", selected.apiKey);
 
-          const res = await api.post('/accounts/ai/create/', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          })
-          localStorage.setItem('ai_job_id', res.data.job_id)
+          const res = await api.post("/accounts/ai/create/", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+          localStorage.setItem("ai_job_id", res.data.job_id);
         } catch (e) {
-          console.error('AI 작업 등록 실패:', e)
+          console.error("AI 작업 등록 실패:", e);
         }
       }
-      router.push('/loading?type=questions')
+      router.push("/loading?type=questions");
     } else {
-      currentStep.value = nextTarget
-      animationClass.value = 'fade-in'
+      currentStep.value = nextTarget;
+      animationClass.value = "fade-in";
     }
-  }, 400)
-}
-
+  }, 400);
+};
 </script>
-
-
 
 <style scoped>
 /* ✨ 마이크로 인터랙션용 페이드 인/아웃 스타일 (0.4초 효과) */
@@ -158,7 +182,9 @@ const triggerNextStep = async (nextTarget) => {
   flex-direction: column;
   height: calc(100vh - 80px);
   box-sizing: border-box;
-  transition: opacity 0.4s ease, transform 0.4s ease; /* 🚀 쫀득한 핵심 트랜지션 */
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease; /* 🚀 쫀득한 핵심 트랜지션 */
 }
 
 /* 다음 스텝으로 넘어갈 때 왼쪽으로 투명하게 스르륵 밀림 */
@@ -175,11 +201,22 @@ const triggerNextStep = async (nextTarget) => {
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.step-wrapper { display: flex; flex-direction: column; height: 100%; flex: 1; }
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1;
+}
 
 .title-block {
   margin-bottom: 40px;
@@ -205,59 +242,109 @@ const triggerNextStep = async (nextTarget) => {
 }
 
 /* 📁 STEP 1: 업로드 디자인 */
-.upload-container { flex: 1; display: flex; align-items: center; justify-content: center; max-height: 380px; }
+.upload-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 380px;
+}
 
 .glass-upload-box {
   width: 240px;
   aspect-ratio: 3 / 4;
-  
+
   border-radius: var(--r-md); /* 💡 디자인 토큰 사용 */
   background: rgba(255, 255, 255, 0.25);
 
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
 
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.25), 
-              0 8px 32px rgba(252, 138, 180, 0.08); 
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.25),
+    0 8px 32px rgba(252, 138, 180, 0.08);
 
-  display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.25s ease;
 }
-.glass-upload-box:hover { 
-    background: rgba(255, 255, 255, 0.2); 
-    border-color: rgba(255, 255, 255, 0.7); 
+.glass-upload-box:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.7);
 }
-.glass-upload-box.has-preview { border-style: solid; border-color: rgba(255,255,255,0.5); }
-.file-hidden { display: none; }
+.glass-upload-box.has-preview {
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.file-hidden {
+  display: none;
+}
 
-.upload-placeholder { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px; }
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
 
-.upload-icon { font-size: 40px; margin-bottom: 12px; }
+.upload-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
 
 /* 💡 [폰트 중복 삭제] font-family 제거 완료 */
-.upload-hint { font-size: 12px; color: rgba(255,255,255,0.5); }
+.upload-hint {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
 
-.preview-wrapper { width: 100%; height: 100%; position: relative; }
-.preview-img { width: 100%; height: 100%; object-fit: cover; }
+.preview-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 /* 💡 [폰트 중복 삭제] font-family 제거 완료 */
-.preview-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.4); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; opacity: 0; transition: opacity 0.2s ease; }
-.preview-wrapper:hover .preview-overlay { opacity: 1; }
-
+.preview-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.preview-wrapper:hover .preview-overlay {
+  opacity: 1;
+}
 
 /* 📊 STEP 2: 2*2 세로형 카드 레이아웃 */
 .grid-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  gap: 14px; 
+  gap: 14px;
   width: 100%;
   margin-bottom: auto;
 }
 .style-card {
-  position: relative; 
+  position: relative;
   border-radius: var(--r-md);
-  overflow: hidden; 
-
+  overflow: hidden;
 
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -268,22 +355,36 @@ const triggerNextStep = async (nextTarget) => {
 .style-card.active {
   border: 0.2px solid #ffffff;
   transform: scale(1.03);
-  box-shadow: 
-    0 0 30px rgba(255, 255, 255, 0.8), 
+  box-shadow:
+    0 0 30px rgba(255, 255, 255, 0.8),
     0 0 50px rgba(255, 255, 255, 0.2);
 }
 
-.card-image-wrapper { width: 100%; height: 100%; }
-.style-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-.style-card:hover .style-img { transform: scale(1.06); }
+.card-image-wrapper {
+  width: 100%;
+  height: 100%;
+}
+.style-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.style-card:hover .style-img {
+  transform: scale(1.06);
+}
 
 .card-info {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  padding: 20px 12px 14px 12px; 
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 100%);
+  padding: 20px 12px 14px 12px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
   text-align: center;
   box-sizing: border-box;
 }
@@ -292,21 +393,20 @@ const triggerNextStep = async (nextTarget) => {
 .style-name {
   font-family: var(--font-display);
   font-size: 14px;
-  font-weight: 500; 
-  color: #ffffff;   
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4); 
+  font-weight: 500;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
-
 /* 🚀 하단 공통 버튼 */
-.action-block { 
-  padding: 16px 0 32px 0; 
+.action-block {
+  padding: 16px 0 32px 0;
   overflow: visible !important;
 
   opacity: 0;
   transform: translateY(20px); /* 아래에 살짝 내려놓기 */
-  pointer-events: none; 
-  
+  pointer-events: none;
+
   transition: all 1.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -317,81 +417,97 @@ const triggerNextStep = async (nextTarget) => {
   pointer-events: auto;
 }
 
-.btn-continue { 
-    width: 240px; 
-    margin: 0 auto;
-    display: block;
-    padding: 14px; 
-    
-    background: linear-gradient(135px, #ffffff 0%, rgba(255, 255, 255, 0.9) 50%, #ffffff 100%);
-    background-size: 200% 200%;
-    color: var(--app-canvas-bg);
-    
-    font-size: 14.5px; 
-    font-weight: 600; 
-    letter-spacing: 0.08em; 
-    text-transform: uppercase; 
-    border: none; 
-    border-radius: var(--r-pill); /* 💡 999px 대신 토큰 사용 */
-    cursor: pointer; 
-    box-sizing: border-box; 
-    font-family: var(--font-display); 
-    position: relative;
-    z-index: 1;
-    
-    animation: glow-aurora 4s ease infinite;
-    box-shadow: 
-      0 0 20px rgba(255, 255, 255, 0.4),  /* 내부 광채 */
-      0 0 40px rgba(255, 255, 255, 0.2),  /* 중간 광채 */
-      0 0 80px rgba(255, 255, 255, 0.1);  /* 외부 확산 광채 */
-    
-    transition: all 0.3s ease;
+.btn-continue {
+  width: 240px;
+  margin: 0 auto;
+  display: block;
+  padding: 14px;
+
+  background: linear-gradient(
+    135px,
+    #ffffff 0%,
+    rgba(255, 255, 255, 0.9) 50%,
+    #ffffff 100%
+  );
+  background-size: 200% 200%;
+  color: var(--app-canvas-bg);
+
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--r-pill); /* 💡 999px 대신 토큰 사용 */
+  cursor: pointer;
+  box-sizing: border-box;
+  font-family: var(--font-display);
+  position: relative;
+  z-index: 1;
+
+  animation: glow-aurora 4s ease infinite;
+  box-shadow:
+    0 0 20px rgba(255, 255, 255, 0.4),
+    /* 내부 광채 */ 0 0 40px rgba(255, 255, 255, 0.2),
+    /* 중간 광채 */ 0 0 80px rgba(255, 255, 255, 0.1); /* 외부 확산 광채 */
+
+  transition: all 0.3s ease;
 }
 
 /* 🔥 [핵심] 버튼이 활성화(:not(:disabled))되었을 때만 일렁임과 오라 발동! */
 .btn-continue:not(:disabled) {
-    animation: glow-aurora 4s ease infinite;
-    box-shadow: 
-      0 0 30px rgba(255, 255, 255, 0.5), 
-      0 0 60px rgba(255, 255, 255, 0.3),
-      0 0 100px rgba(255, 255, 255, 0.1);
+  animation: glow-aurora 4s ease infinite;
+  box-shadow:
+    0 0 30px rgba(255, 255, 255, 0.5),
+    0 0 60px rgba(255, 255, 255, 0.3),
+    0 0 100px rgba(255, 255, 255, 0.1);
 }
 
 /* 호버했을 때 살짝 떠오르는 텐션 */
 .btn-continue:not(:disabled):hover {
-    transform: translateY(-2px);
-    box-shadow: 
-      0 0 40px rgba(255, 255, 255, 0.6), 
-      0 0 80px rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 40px rgba(255, 255, 255, 0.6),
+    0 0 80px rgba(255, 255, 255, 0.4);
 }
 
 /* ❌ 비활성화 상태일 때는 일렁임도 끄고 투명하게 */
-.btn-continue:disabled { 
-    background: rgba(255, 255, 255, 0.3); 
-    color: rgba(255, 255, 255, 0.6); 
-    cursor: not-allowed; 
-    box-shadow: none;
-    animation: none;
+.btn-continue:disabled {
+  background: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: not-allowed;
+  box-shadow: none;
+  animation: none;
 }
-
 
 /* 💡 활성화된 버튼의 뒤쪽에 가짜 복사본을 만들어 흐릿하게(blur) 만들고 숨쉬듯 키워줍니다 */
 .btn-continue:not(:disabled)::before {
-    content: '';
-    position: absolute;
-    inset: -2px; /* 버튼보다 살짝 크게 */
-    border-radius: var(--r-pill);
-    background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255, 186, 212, 0.609), rgba(255, 255, 255, 0.8));
-    background-size: 200%;
-    z-index: -1; /* 버튼 글씨 뒤로 숨기 */
-    filter: blur(10px);
-    opacity: 0.7;
-    animation: glow-aurora 3s linear infinite, pulse-glow 2s ease-in-out infinite alternate;
+  content: "";
+  position: absolute;
+  inset: -2px; /* 버튼보다 살짝 크게 */
+  border-radius: var(--r-pill);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 186, 212, 0.609),
+    rgba(255, 255, 255, 0.8)
+  );
+  background-size: 200%;
+  z-index: -1; /* 버튼 글씨 뒤로 숨기 */
+  filter: blur(10px);
+  opacity: 0.7;
+  animation:
+    glow-aurora 3s linear infinite,
+    pulse-glow 2s ease-in-out infinite alternate;
 }
 
 @keyframes pulse-glow {
-    from { transform: scale(0.98); opacity: 0.5; }
-    to { transform: scale(1.03); opacity: 0.9; }
+  from {
+    transform: scale(0.98);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(1.03);
+    opacity: 0.9;
+  }
 }
-
 </style>

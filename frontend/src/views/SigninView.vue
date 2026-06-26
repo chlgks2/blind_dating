@@ -21,8 +21,25 @@ const login = async () => {
     })
     localStorage.setItem('access', res.data.access)
     localStorage.setItem('refresh', res.data.refresh)
-    message.value = '로그인 성공!'
-    setTimeout(() => router.push('/loading?type=signin'), 800)
+
+    // 프로필 조회해서 AI 이미지 저장 + 이미 설문 완료한 유저는 매칭으로 이동
+    try {
+      const me = await api.get('/accounts/me/')
+      if (me.data.ai_image_url) {
+        localStorage.setItem('ai_generated_url', me.data.ai_image_url)
+      }
+      message.value = '로그인 성공!'
+      setTimeout(() => {
+        if (me.data.is_survey_done) {
+          router.push('/matching')
+        } else {
+          router.push('/loading?type=signin')
+        }
+      }, 800)
+    } catch {
+      message.value = '로그인 성공!'
+      setTimeout(() => router.push('/loading?type=signin'), 800)
+    }
   } catch (e) {
     message.value = '아이디 또는 비밀번호가 올바르지 않습니다.'
   }
