@@ -23,3 +23,28 @@ frontend/dist/
 
 test_s3.py__pycache__/
 *.pyc
+
+# ===== AI 모델 가중치 (약 69GB, 저장소 제외) =====
+*.safetensors
+*.ckpt
+*.pth
+*.bin
+*.onnx
+*.7z
+ai/models/checkpoints/
+ai/models/loras/
+ai/models/ipadapter/
+ai/models/clip_vision/
+ai/models/insightface/
+ai/models/sams/
+ai/models/ultralytics/
+ai/models/upscale_models/
+!ai/models/manifest.json
+
+# ComfyUI 입출력
+ai/input/
+ai/output/
+ai/temp/
+
+# 백업 파일
+*.bak
