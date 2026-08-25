@@ -1,0 +1,48 @@
+# ===== 모델 가중치 (절대 커밋하지 않음, 합계 약 69GB) =====
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.onnx
+*.zip
+models/checkpoints/
+models/loras/
+models/ipadapter/
+models/clip_vision/
+models/insightface/
+models/sams/
+models/ultralytics/
+models/upscale_models/
+models/vae/
+!models/manifest.json
+
+# ===== 입출력 이미지 =====
+input/
+output/
+temp/
+*.jpg
+*.jpeg
+*.png
+*.webp
+!docs/images/*.jpg
+!docs/images/*.png
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# ===== 환경변수 / 로그 =====
+.env
+.env.*
+!.env.example
+*.log
+logs/
+
+# ===== ComfyUI (서브모듈/외부 설치본을 이 폴더에 두는 경우) =====
+ComfyUI/
+comfyui/
