@@ -1,0 +1,452 @@
+{
+  "10": {
+    "inputs": {
+      "image": "input.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "원본 이미지"
+    }
+  },
+  "16": {
+    "inputs": {
+      "ckpt_name": "dreamshaperXL_lightningDPMSDE.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "[S1] Juggernaut XL"
+    }
+  },
+  "18": {
+    "inputs": {
+      "text": "portrait of a person, detailed face, soft lighting, high quality, masterpiece",
+      "clip": [
+        "16",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "[S1] positive"
+    }
+  },
+  "19": {
+    "inputs": {
+      "text": "worst quality, low quality, blurry, deformed, bad anatomy, ugly, distorted face",
+      "clip": [
+        "16",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "[S1] negative"
+    }
+  },
+  "20": {
+    "inputs": {
+      "seed": 96819860294764,
+      "steps": 30,
+      "cfg": 5,
+      "sampler_name": "dpmpp_2m_sde",
+      "scheduler": "karras",
+      "denoise": 0.35,
+      "model": [
+        "40",
+        0
+      ],
+      "positive": [
+        "18",
+        0
+      ],
+      "negative": [
+        "19",
+        0
+      ],
+      "latent_image": [
+        "41",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "[S1] KSampler"
+    }
+  },
+  "21": {
+    "inputs": {
+      "samples": [
+        "20",
+        0
+      ],
+      "vae": [
+        "16",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "[S1] VAE Decode"
+    }
+  },
+  "40": {
+    "inputs": {
+      "weight": 0.7,
+      "weight_faceidv2": 1,
+      "weight_type": "linear",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 1,
+      "embeds_scaling": "V only",
+      "model": [
+        "50",
+        0
+      ],
+      "ipadapter": [
+        "50",
+        1
+      ],
+      "image": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "IPAdapterFaceID",
+    "_meta": {
+      "title": "[S1] FaceID Plus V2"
+    }
+  },
+  "41": {
+    "inputs": {
+      "pixels": [
+        "10",
+        0
+      ],
+      "vae": [
+        "16",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "[S1] VAE Encode"
+    }
+  },
+  "50": {
+    "inputs": {
+      "preset": "FACEID PLUS V2",
+      "lora_strength": 0.6,
+      "provider": "CPU",
+      "model": [
+        "16",
+        0
+      ]
+    },
+    "class_type": "IPAdapterUnifiedLoaderFaceID",
+    "_meta": {
+      "title": "[S1] FaceID Loader"
+    }
+  },
+  "60": {
+    "inputs": {
+      "model_name": "bbox/face_yolov8m.pt"
+    },
+    "class_type": "UltralyticsDetectorProvider",
+    "_meta": {
+      "title": "[S2] Face Detector"
+    }
+  },
+  "61": {
+    "inputs": {
+      "model_name": "sam_vit_b_01ec64.pth",
+      "device_mode": "AUTO"
+    },
+    "class_type": "SAMLoader",
+    "_meta": {
+      "title": "[S2] SAM Loader"
+    }
+  },
+  "62": {
+    "inputs": {
+      "guide_size": 512,
+      "guide_size_for": true,
+      "max_size": 1024,
+      "seed": 1099321369849104,
+      "steps": 25,
+      "cfg": 7,
+      "sampler_name": "dpmpp_2m_sde",
+      "scheduler": "karras",
+      "denoise": 0.4,
+      "feather": 5,
+      "noise_mask": true,
+      "force_inpaint": true,
+      "bbox_threshold": 0.5,
+      "bbox_dilation": 10,
+      "bbox_crop_factor": 3,
+      "sam_detection_hint": "center-1",
+      "sam_dilation": 0,
+      "sam_threshold": 0.93,
+      "sam_bbox_expansion": 0,
+      "sam_mask_hint_threshold": 0.7,
+      "sam_mask_hint_use_negative": "False",
+      "drop_size": 10,
+      "wildcard": "",
+      "cycle": 1,
+      "inpaint_model": false,
+      "noise_mask_feather": 20,
+      "tiled_encode": false,
+      "tiled_decode": false,
+      "image": [
+        "206",
+        0
+      ],
+      "model": [
+        "201",
+        0
+      ],
+      "clip": [
+        "201",
+        1
+      ],
+      "vae": [
+        "200",
+        2
+      ],
+      "positive": [
+        "202",
+        0
+      ],
+      "negative": [
+        "203",
+        0
+      ],
+      "bbox_detector": [
+        "60",
+        0
+      ],
+      "sam_model_opt": [
+        "61",
+        0
+      ]
+    },
+    "class_type": "FaceDetailer",
+    "_meta": {
+      "title": "[S2] FaceDetailer"
+    }
+  },
+  "70": {
+    "inputs": {
+      "model_name": "4x-UltraSharp.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "[S2] Upscale Model"
+    }
+  },
+  "71": {
+    "inputs": {
+      "upscale_by": 1.2,
+      "seed": 950700967387617,
+      "steps": 15,
+      "cfg": 6,
+      "sampler_name": "dpmpp_2m_sde",
+      "scheduler": "karras",
+      "denoise": 0.2,
+      "mode_type": "Linear",
+      "tile_width": 512,
+      "tile_height": 512,
+      "mask_blur": 8,
+      "tile_padding": 32,
+      "seam_fix_mode": "None",
+      "seam_fix_denoise": 1,
+      "seam_fix_width": 64,
+      "seam_fix_mask_blur": 8,
+      "seam_fix_padding": 16,
+      "force_uniform_tiles": true,
+      "tiled_decode": false,
+      "batch_size": 1,
+      "image": [
+        "62",
+        0
+      ],
+      "model": [
+        "201",
+        0
+      ],
+      "positive": [
+        "202",
+        0
+      ],
+      "negative": [
+        "203",
+        0
+      ],
+      "vae": [
+        "200",
+        2
+      ],
+      "upscale_model": [
+        "70",
+        0
+      ]
+    },
+    "class_type": "UltimateSDUpscale",
+    "_meta": {
+      "title": "[S2] Ultimate SD Upscale"
+    }
+  },
+  "100": {
+    "inputs": {
+      "filename_prefix": "Stage1_FaceID",
+      "images": [
+        "21",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "[S1] Save (얼굴 확보)"
+    }
+  },
+  "200": {
+    "inputs": {
+      "ckpt_name": "meinamix_v12Final.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "[S2] MeinaMix V12"
+    }
+  },
+  "201": {
+    "inputs": {
+      "lora_name": "thickline_fp16.safetensors",
+      "strength_model": 0.6,
+      "strength_clip": 0.6,
+      "model": [
+        "200",
+        0
+      ],
+      "clip": [
+        "200",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "[S2] Thicker Lines LoRA"
+    }
+  },
+  "202": {
+    "inputs": {
+      "text": "anime style, 2d illustration, thick lines, cel shading, vibrant colors, detailed face, masterpiece, best quality",
+      "clip": [
+        "201",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "[S2] positive"
+    }
+  },
+  "203": {
+    "inputs": {
+      "text": "worst quality, low quality, blurry, deformed, bad anatomy, ugly, extra fingers, realistic, photo, 3d, distorted face",
+      "clip": [
+        "201",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "[S2] negative"
+    }
+  },
+  "204": {
+    "inputs": {
+      "pixels": [
+        "21",
+        0
+      ],
+      "vae": [
+        "200",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "[S2] VAE Encode (S1결과 입력)"
+    }
+  },
+  "205": {
+    "inputs": {
+      "seed": 191139337692237,
+      "steps": 25,
+      "cfg": 7,
+      "sampler_name": "dpmpp_2m_sde",
+      "scheduler": "karras",
+      "denoise": 0.45,
+      "model": [
+        "201",
+        0
+      ],
+      "positive": [
+        "202",
+        0
+      ],
+      "negative": [
+        "203",
+        0
+      ],
+      "latent_image": [
+        "204",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "[S2] KSampler"
+    }
+  },
+  "206": {
+    "inputs": {
+      "samples": [
+        "205",
+        0
+      ],
+      "vae": [
+        "200",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "[S2] VAE Decode"
+    }
+  },
+  "300": {
+    "inputs": {
+      "filename_prefix": "Stage2_Final_Anime",
+      "images": [
+        "71",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "[S2] Final Save"
+    }
+  },
+  "301": {
+    "inputs": {
+      "images": [
+        "71",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "최종 Preview"
+    }
+  }
+}

@@ -1,0 +1,222 @@
+{
+  "_comment": [
+    "ComfyUI 모델 매니페스트. 가중치는 저장소에 포함되지 않으며 이 파일을 기준으로 다운로드합니다.",
+    "source.type: 'hf' = HuggingFace repo, 'url' = 직접 다운로드, 'manual' = 자동 다운로드 불가(수동)",
+    "source.repo / source.file 이 null 인 항목은 본인이 내려받은 실제 출처를 채워 넣으세요.",
+    "required: true 인 항목만 기본 설치 대상입니다. (--all 옵션으로 비교용 후보까지 전체 설치)"
+  ],
+  "models": [
+    {
+      "name": "DreamShaper XL Lightning (운영 베이스)",
+      "dest": "models/checkpoints/dreamshaperXL_lightningDPMSDE.safetensors",
+      "size": "6.9GB",
+      "required": true,
+      "source": {
+        "type": "hf",
+        "repo": "Lykon/dreamshaper-xl-lightning",
+        "file": null,
+        "note": "⚠️ repo 내 실제 파일명을 확인해 기입하세요 (예: DreamShaperXL_Lightning_DPMSDE.safetensors). Civitai에서 받았다면 source.type을 'url'로 바꾸고 url을 넣으세요."
+      }
+    },
+    {
+      "name": "Juggernaut-XL v9 (초기 실험 베이스)",
+      "dest": "models/checkpoints/Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors",
+      "size": "7.1GB",
+      "required": false,
+      "source": {
+        "type": "hf",
+        "repo": "RunDiffusion/Juggernaut-XL-v9",
+        "file": "Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors"
+      }
+    },
+    {
+      "name": "MeinaMix v12 Final (SD1.5)",
+      "dest": "models/checkpoints/meinamix_v12Final.safetensors",
+      "size": "2.1GB",
+      "required": true,
+      "source": {
+        "type": "hf",
+        "repo": null,
+        "file": null,
+        "note": "⚠️ 실제 받은 HuggingFace repo / 파일명을 기입하세요"
+      }
+    },
+    {
+      "name": "IP-Adapter FaceID Plus V2 (SDXL)",
+      "dest": "models/ipadapter/ip-adapter-faceid-plusv2_sdxl.bin",
+      "size": "1.5GB",
+      "required": true,
+      "source": {
+        "type": "hf",
+        "repo": "h94/IP-Adapter-FaceID",
+        "file": "ip-adapter-faceid-plusv2_sdxl.bin"
+      }
+    },
+    {
+      "name": "IP-Adapter FaceID Plus V2 LoRA (SDXL)",
+      "dest": "models/loras/ip-adapter-faceid-plusv2_sdxl_lora.safetensors",
+      "size": "372MB",
+      "required": true,
+      "source": {
+        "type": "hf",
+        "repo": "h94/IP-Adapter-FaceID",
+        "file": "ip-adapter-faceid-plusv2_sdxl_lora.safetensors"
+      }
+    },
+    {
+      "name": "CLIP-ViT-H-14 (IPAdapter image encoder)",
+      "dest": "models/clip_vision/CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors",
+      "size": "2.5GB",
+      "required": true,
+      "source": {
+        "type": "hf",
+        "repo": "h94/IP-Adapter",
+        "file": "models/image_encoder/model.safetensors"
+      }
+    },
+    {
+      "name": "4x-UltraSharp (upscaler)",
+      "dest": "models/upscale_models/4x-UltraSharp.pth",
+      "size": "67MB",
+      "required": true,
+      "source": {
+        "type": "hf",
+        "repo": "lokCX/4x-Ultrasharp",
+        "file": "4x-UltraSharp.pth"
+      }
+    },
+    {
+      "name": "face_yolov8m (face detector)",
+      "dest": "models/ultralytics/bbox/face_yolov8m.pt",
+      "size": "52MB",
+      "required": true,
+      "source": {
+        "type": "hf",
+        "repo": "Bingsu/adetailer",
+        "file": "face_yolov8m.pt"
+      }
+    },
+    {
+      "name": "SAM ViT-B",
+      "dest": "models/sams/sam_vit_b_01ec64.pth",
+      "size": "375MB",
+      "required": true,
+      "source": {
+        "type": "url",
+        "url": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth"
+      }
+    },
+    {
+      "name": "InsightFace buffalo_l",
+      "dest": "models/insightface/models/buffalo_l/",
+      "size": "340MB",
+      "required": true,
+      "source": {
+        "type": "manual",
+        "note": "IPAdapter FaceID 노드 최초 실행 시 자동 다운로드됩니다. 실패 시 InsightFace 릴리스에서 buffalo_l.zip을 받아 압축 해제하세요."
+      }
+    },
+    {
+      "name": "Ghibli LoRA (최종 채택)",
+      "dest": "models/loras/giblylast.safetensors",
+      "size": "456MB",
+      "required": true,
+      "source": {
+        "type": "hf",
+        "repo": null,
+        "file": null,
+        "note": "⚠️ 실제 받은 출처를 기입하세요"
+      }
+    },
+    {
+      "name": "Thick line LoRA (2-stage 2단계)",
+      "dest": "models/loras/thickline_fp16.safetensors",
+      "size": "151MB",
+      "required": true,
+      "source": {
+        "type": "hf",
+        "repo": null,
+        "file": null,
+        "note": "⚠️ 실제 받은 출처를 기입하세요"
+      }
+    },
+    {
+      "name": "Pixar style LoRA",
+      "dest": "models/loras/tangbohu-pixarstyle-xl.safetensors",
+      "size": "457MB",
+      "required": true,
+      "source": {
+        "type": "hf",
+        "repo": null,
+        "file": null,
+        "note": "⚠️ 실제 받은 출처를 기입하세요"
+      }
+    },
+    {
+      "name": "Animagine XL 4.0 (비교용)",
+      "dest": "models/checkpoints/animagine-xl-4.0.safetensors",
+      "size": "6.9GB",
+      "required": false,
+      "source": {
+        "type": "hf",
+        "repo": "cagliostrolab/animagine-xl-4.0",
+        "file": "animagine-xl-4.0.safetensors"
+      }
+    },
+    {
+      "name": "SDXL base 1.0 (기준선)",
+      "dest": "models/checkpoints/sd_xl_base_1.0.safetensors",
+      "size": "6.9GB",
+      "required": false,
+      "source": {
+        "type": "hf",
+        "repo": "stabilityai/stable-diffusion-xl-base-1.0",
+        "file": "sd_xl_base_1.0.safetensors"
+      }
+    },
+    {
+      "name": "IP-Adapter Plus (SDXL, 비교용)",
+      "dest": "models/ipadapter/ip-adapter-plus_sdxl_vit-h.safetensors",
+      "size": "848MB",
+      "required": false,
+      "source": {
+        "type": "hf",
+        "repo": "h94/IP-Adapter",
+        "file": "sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors"
+      }
+    },
+    {
+      "name": "IP-Adapter (SDXL, 비교용)",
+      "dest": "models/ipadapter/ip-adapter_sdxl.safetensors",
+      "size": "703MB",
+      "required": false,
+      "source": {
+        "type": "hf",
+        "repo": "h94/IP-Adapter",
+        "file": "sdxl_models/ip-adapter_sdxl.safetensors"
+      }
+    },
+    {
+      "name": "hand_yolov8s (실험)",
+      "dest": "models/ultralytics/bbox/hand_yolov8s.pt",
+      "size": "23MB",
+      "required": false,
+      "source": {
+        "type": "hf",
+        "repo": "Bingsu/adetailer",
+        "file": "hand_yolov8s.pt"
+      }
+    },
+    {
+      "name": "person_yolov8m-seg (실험)",
+      "dest": "models/ultralytics/segm/person_yolov8m-seg.pt",
+      "size": "55MB",
+      "required": false,
+      "source": {
+        "type": "hf",
+        "repo": "Bingsu/adetailer",
+        "file": "person_yolov8m-seg.pt"
+      }
+    }
+  ]
+}
