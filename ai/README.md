@@ -194,9 +194,17 @@ CheckpointLoaderSimple  dreamshaperXL_lightningDPMSDE (SDXL Lightning)
 
 ## 6. 결과 예시
 
-`anime2d` 스타일 변환 결과입니다. (입력 사진은 개인 사진이라 공개하지 않습니다)
+`anime2d` 스타일 변환의 **전/후 비교**입니다.
 
-<img src="docs/images/after_anime2d.png" width="320">
+![변환 전후 비교](docs/images/before_after.jpg)
+
+주목할 지점은 **바뀌지 않은 것들**입니다 — 상체 각도, 팔의 위치, 상의 색, 배경의 구조가 그대로 남습니다. `denoise 0.6`으로 부분만 디노이즈하기 때문이고, 이것이 "이게 내 사진인가"를 결정합니다. `denoise 1.0`(txt2img)이면 프롬프트만 반영된 **완전히 다른 사람**이 나옵니다.
+
+얼굴이 뭉개지지 않는 것은 `FaceDetailer`(denoise 0.3)가 얼굴만 crop해 고해상도로 재생성한 뒤 SAM 마스크로 되붙이기 때문이고, 그 재생성 denoise를 0.3으로 묶어둔 이유는 **인물이 바뀌면 안 되기** 때문입니다.
+
+> 샘플 사진은 본인과 팀원의 동의를 받아 실었습니다. 서비스 사용자의 사진은 포함돼 있지 않습니다.
+
+<img src="docs/images/after_anime2d.png" width="300">
 
 ---
 
